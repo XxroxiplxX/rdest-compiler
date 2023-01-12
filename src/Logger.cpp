@@ -6,4 +6,7 @@ namespace Logging {
         output << msg << std::endl;
         std::cout << "                                  dzialam" << std::endl;
     }
+    void Logger::log(std::string msg, int param) {
+        output << msg << param << std::endl;
+    }
 }
