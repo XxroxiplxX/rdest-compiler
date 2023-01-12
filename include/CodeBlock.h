@@ -1,7 +1,7 @@
 #include <vector>
 #include<string>
 
-enum _type_of_meat {
+/*enum _type_of_meat {
     _COND = 1,
     _READ = 2,
     _WRITE = 3,
@@ -27,11 +27,11 @@ struct Instruction {
 
 class CodeBlock {
     public:
-        std::vector<std::string> meat;
+        std::vector<Instruction> meat;
         int id;
-        CodeBlock(std:: string one, std::string two) {
-            meat.push_back(one);
-            meat.push_back(two);
+        CodeBlock(Instruction instruction, int id) {
+            meat.push_back(instruction);
+            this->id = id;
         }
 
-};
+};*/

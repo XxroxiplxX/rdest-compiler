@@ -10,7 +10,8 @@ namespace Logging {
             Logger(std:: string filename) : file_name(filename) {
                 output.open(file_name);
             }
-            void log(std::string msg);
+            void log(std::string msg);\
+            void log(std::string msg, int param);
             ~Logger() {
                 output.close();
             }
