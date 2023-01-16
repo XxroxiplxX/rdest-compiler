@@ -23,7 +23,7 @@ analyzer.cpp:
 	flex -o ../src/analyzer.cpp ../src/lexer.l
 # COMPILING
 %.o: %.cpp $(INC)
-	g++ -Wall $(HEADERS) -c $< -o $@
+	g++ -pedantic $(HEADERS) -c $< -o $@
 
 
 $(EXEC): $(SRC) $(INC) $(OBJ)

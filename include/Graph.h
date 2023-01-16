@@ -49,6 +49,12 @@ namespace GraphLib {
         int diameter();
         int radius();
         void save_to_csv(std::string path);
+        void print_e() {
+            for (auto it : edges) {
+                std::cout << it.u->label << " -> " << it.v->label << "    ";
+            }
+            std::cout << std::endl;
+        }
     };
 
     template<class T, class L>
@@ -153,6 +159,7 @@ namespace GraphLib {
         auto u = get_vertex(ut);
         auto v = get_vertex(vt);
         if (!(u and v)) {
+            std::cout << "problem" << std::endl;
             return;
         }
         edges.push_back(Edge<T,L>(u,v, label));
@@ -170,10 +177,15 @@ namespace GraphLib {
         outdata_e << "e1" << ";" << "e2" << std::endl;
         for (auto vertex : vertices) {
             outdata_v << vertex.label << ";" << std::endl;
+            std::cout << vertex.label << ";" << std::endl;
         }
         outdata_v.close();
-        for (auto edge : edges) {
+        /*for (auto edge : edges) {
             outdata_e << edge.u->label << ";" << edge.v->label << std::endl;
+            
+        }*/
+        for (int i = 0; i < edges.size(); i++) {
+            outdata_e << edges[i].u->label << ";" << edges[i].v->label << std::endl;
         }
         outdata_e.close();
     }

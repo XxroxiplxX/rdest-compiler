@@ -63,22 +63,22 @@ using namespace std;
 %x COMMENT
 %%
 \t              { }
-\;              {yylval.text=strdup(yytext);  return SEMICOLON;}
-=               {yylval.text=strdup(yytext);  return EQ;}
-:=              {yylval.text=strdup(yytext);  return ASSIGN;}
-,               {yylval.text=strdup(yytext);  return COMMA;}
-\+              {yylval.text=strdup(yytext);   return PLUS;}
--               {yylval.text=strdup(yytext);   return MIN;}
-\*              {yylval.text=strdup(yytext);  return MUL;}
-\/              {yylval.text=strdup(yytext);   return DIV;}
-"%"             {yylval.text=strdup(yytext);  return MOD;}
-\(              {yylval.text=strdup(yytext);  return LBR;}
-\)              {yylval.text=strdup(yytext);  return RBR;}
-!=              {yylval.text=strdup(yytext);  return NEQ;}
-"<"             {yylval.text=strdup(yytext);    return LLESS;}
-">"             {yylval.text=strdup(yytext);   return LMORE;}
-"<="            {yylval.text=strdup(yytext);    return LLEQ;}
-">="            {yylval.text=strdup(yytext);   return LLEQ;}
+\;              {yylval = std::string(yytext);  return SEMICOLON;}
+=               {yylval = std::string(yytext);  return EQ;}
+:=              {yylval = std::string(yytext);  return ASSIGN;}
+,               {yylval = std::string(yytext); return COMMA;}
+\+              {yylval = std::string(yytext);   return PLUS;}
+-               {yylval = std::string(yytext);   return MIN;}
+\*              {yylval = std::string(yytext);  return MUL;}
+\/              {yylval = std::string(yytext);  return DIV;}
+"%"             {yylval = std::string(yytext);  return MOD;}
+\(              {yylval = std::string(yytext);  return LBR;}
+\)              {yylval = std::string(yytext); return RBR;}
+!=              {yylval = std::string(yytext);  return NEQ;}
+"<"             {yylval = std::string(yytext);    return LLESS;}
+">"             {yylval = std::string(yytext);  return LMORE;}
+"<="            {yylval = std::string(yytext);   return LLEQ;}
+">="            {yylval = std::string(yytext);  return LLEQ;}
 \[              {BEGIN(COMMENT);  }
 <COMMENT>{
     \]           {  BEGIN(0);}
@@ -88,7 +88,7 @@ using namespace std;
 [A-Z]+          {
                      
                     std::string ID(yytext);
-                    yylval.text=strdup(yytext);
+                    yylval = ID;
                     if (ID == "PROCEDURE") {
                         return PROCEDURE;
                     } else if (ID == "IS") {
@@ -125,8 +125,14 @@ using namespace std;
                         return PROGRAM;
                     } else ECHO;
                 }
-[[:digit:]]+ {yylval.text=strdup(yytext);  return NUM;}
-[_a-z]+ {yylval.text=strdup(yytext);  return IDENTIFIER;}
+[[:digit:]]+ {
+    std::string ID = "NUM_" + std::string(yytext);
+    yylval = ID;    return NUM;
+    }
+[_a-z]+ {
+    std::string ID = "ID_" + std::string(yytext);
+    yylval = ID;    return IDENTIFIER;
+    }
 
 \n          {  lines++;}
 [[:space:]] { }
