@@ -18,6 +18,7 @@ auto t = DirectedGraph();
 std::vector<Vertexx> vertic;
 std::vector<std::string> procs;
 int id = 0;
+bool head_sig = 1;
 
 %}
 
@@ -77,7 +78,7 @@ program_all:
 ;
 procedures:
     procedures PROCEDURE proc_head IS VAR proc_declarations BEGI commands END    {
-        
+        head_sig = 1;
         std::string proc_name = $3;
         std::string proc_id = "";
         int no_of_args = 0;
@@ -105,7 +106,7 @@ procedures:
         
     }
     | procedures PROCEDURE proc_head IS BEGI commands END   {
-        
+        head_sig = 1;
         std::string proc_name = $3;
         std::string proc_id = "";
         logger.log("to parse: " + proc_name);
@@ -183,7 +184,10 @@ commands:
 ;
 command:
     proc_head SEMICOLON {
-        
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         std::string proc = $1;
         std::string tmp = "";
         std::string name;
@@ -218,7 +222,7 @@ command:
                 t.add_vertexx(id);
                 //logger.log("dodano vertex pod assign z id: ", id);
                 t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
-
+                //logger.log(t.vertices[id]);
                 EdgeProvider provider;
                 provider.set_begin_id(id);
                 provider.set_end_id(id);
@@ -240,7 +244,12 @@ command:
     o lewy argument
         //t.add_vertexx(id);
         //logger.log("dodano vertex pod assign z id: ", id);
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.get_vertexx(providers[stoi($3)]._begin_id)->meat[0].left = Value($1);
+        logger.log(*t.get_vertexx(providers[stoi($3)]._begin_id));
         //logger.log("______" + t.get_vertexx(providers[$3]._begin_id)->meat[0].left + "_______");
         //logger.log("_________" + t.get_vertexx(providers[$3]._begin_id)->meat[0].expr.left + 
         //std::to_string(t.get_vertexx(providers[$3]._begin_id)->meat[0].expr.type_of_operator) +
@@ -331,6 +340,10 @@ command:
     }
     
     | READ IDENTIFIER SEMICOLON {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //logger.log("dodano vertex na READ z id: ", id);
         EdgeProvider provider;
@@ -343,12 +356,17 @@ command:
         }
     | WRITE value SEMICOLON {
 
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //logger.log("dodano vertex na WRITE z id: ", id);
         EdgeProvider provider;
         provider.set_begin_id(id);
         provider.set_end_id(id);
         providers.push_back(provider);
+        logger.log(*t.get_vertexx(id));
         $$=std::to_string(id);
         id++;
         /*int id = graph.size();
@@ -394,6 +412,10 @@ declarations:
 
 expression:
     value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
         expression.type_of_operator = _type_of_operator::_NONE;
@@ -415,6 +437,10 @@ expression:
         id++;
     }
     | value PLUS value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
         expression.type_of_operator = _type_of_operator::_ADD;
@@ -437,6 +463,10 @@ expression:
         id++;
     }
     | value MIN value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
         expression.type_of_operator = _type_of_operator::_DIV;
@@ -459,6 +489,10 @@ expression:
         id++;
     }
     | value MUL value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
         expression.type_of_operator = _type_of_operator::_MUL;
@@ -481,6 +515,10 @@ expression:
         id++;
     }
     | value DIV value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
         expression.type_of_operator = _type_of_operator::_DIV;
@@ -503,6 +541,10 @@ expression:
         id++;
     }
     | value MOD value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
         expression.type_of_operator = _type_of_operator::_MOD;
@@ -527,6 +569,10 @@ expression:
 ;
 condition:
     value EQ value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         //logger.log("@@@@COND" + std::string($<text>1) + " = " + std::string($<text>3) + "@@@@");
         t.add_vertexx(id);
         //CodeBlock codeblock;
@@ -538,6 +584,7 @@ condition:
         //instruction.left = $1;
         //instruction.right = $3;
         t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
+        logger.log(t.vertices[id]);
         //codeblock.meat.push_back(instruction);
         //t.get_vertexx(id)->codeblock = codeblock;
         logger.log("@@@condition: " + instruction.left.load + " = " + instruction.right.load + "---->"
@@ -550,6 +597,10 @@ condition:
         id++;
     }
     |value NEQ value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //CodeBlock codeblock;
         Instruction instruction;
@@ -572,6 +623,10 @@ condition:
         id++;
     }
     |value LMORE value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //CodeBlock codeblock;
         Instruction instruction;
@@ -594,6 +649,10 @@ condition:
         id++;
     }
     |value LLESS value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //CodeBlock codeblock;
         Instruction instruction;
@@ -616,6 +675,10 @@ condition:
         id++;
     }
     |value LHEQ value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //CodeBlock codeblock;
         Instruction instruction;
@@ -638,6 +701,10 @@ condition:
         id++;
     }
     |value LLEQ value {
+        if (head_sig) {
+            logger.log("&&&codeblock glowa z id:",id);
+        }
+        head_sig = 0;
         t.add_vertexx(id);
         //CodeBlock codeblock;
         Instruction instruction;

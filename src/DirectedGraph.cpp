@@ -1,6 +1,18 @@
 #include "../include/DirectedGraph.h"
 
 
+
+void DirectedGraph::translate_ins(Instruction ins) {
+    //translacja ID := ID + ID;
+    architecture.assert_var("a");
+    architecture.assert_var("b");
+    architecture.assert_var("c");
+    log.log("utoworzono rejestry zmiennych a b c");
+    _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register("b")));
+    _asm_instructions.push_back(AsmInstruction("ADD", architecture.get_register("c")));
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_register("a")));
+}
+
 void DirectedGraph::add_vertexx(int v_id) {
     vertices.push_back(CodeBlock(v_id));
 }

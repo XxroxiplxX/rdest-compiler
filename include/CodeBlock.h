@@ -10,9 +10,12 @@ enum type_of_value {
 };
 struct Value {
     int type;
-    std::string load;
+    std::string load="";
     Value() {
         type = 0;
+    }
+    std::string val_to_string() {
+        return "%val% = %type:" + std::to_string(type) + "%load:" + load;
     }
     Value(std::string _load) {
         if (_load[0] == 'I') {
@@ -55,14 +58,24 @@ struct Expression {
     int type_of_operator;
     Value left;
     Value right;
+    std::string exp_to_string() {
+        return "%%%exp---->" + left.val_to_string() + "____" + std::to_string(type_of_operator) + "____" + right.val_to_string();
+    }
 };
 struct Instruction {
-    int type_of_instruction;
+    _type_of_meat type_of_instruction;
     int type_of_operator;
     Value left;
     Value right;
     Expression expr;
     std::vector<Value> args;
+    std::string to_asm() {
+        //switch (type_of_instruction) {
+          //  case _type_of_meat::_ASS:
+                //aaaa
+            return "";
+        //}
+    }
 };
 
 class CodeBlock {
