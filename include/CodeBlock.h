@@ -23,9 +23,14 @@ struct Value {
             for (int i = 3; i < _load.length(); i++) {
                 load += _load[i];
             }
-        } else {
+        } else if (_load[0] == 'N') {
             type = type_of_value::_NUM;
             for (int i = 4; i < _load.length(); i++) {
+                load += _load[i];
+            }
+        } else {
+            type = type_of_value::_ID;
+            for (int i = 3; i < _load.length(); i++) {
                 load += _load[i];
             }
         }
@@ -55,7 +60,7 @@ enum _type_of_operator {
     _NONE = 0
 } ;
 struct Expression {
-    int type_of_operator;
+    _type_of_operator type_of_operator;
     Value left;
     Value right;
     std::string exp_to_string() {
@@ -81,7 +86,7 @@ struct Instruction {
 class CodeBlock {
     public:
         std::vector<Instruction> meat;
-        
+        std::vector<CodeBlock*> nbrs_ptrs;
         CodeBlock(){}
         int id;
         std::vector<int> neighbours;

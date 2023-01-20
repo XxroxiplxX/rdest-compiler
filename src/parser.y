@@ -11,6 +11,7 @@
 
 std::vector<EdgeProvider> providers;
 int yylex();
+std::string clean_ID(std::string ID);
 void yyerror(const char *s);
 auto logger = Logging::Logger("logs.log");
 auto control_flow_graph = GraphLib::Graph<int, int>();
@@ -74,7 +75,7 @@ bool head_sig = 1;
 %%
 
 program_all:
-    procedures main {t.save_to_csv("/tmp/graphs");}
+    procedures main {}
 ;
 procedures:
     procedures PROCEDURE proc_head IS VAR proc_declarations BEGI commands END    {
@@ -185,6 +186,7 @@ commands:
 command:
     proc_head SEMICOLON {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -245,10 +247,13 @@ command:
         //t.add_vertexx(id);
         //logger.log("dodano vertex pod assign z id: ", id);
         if (head_sig) {
-            logger.log("&&&codeblock glowa z id:",id);
+            //t.head_ids.push_back(id);
+            printf("glowaaaa\n");
+            logger.log("&&&code----------block glowa z id:",id);
         }
         head_sig = 0;
         t.get_vertexx(providers[stoi($3)]._begin_id)->meat[0].left = Value($1);
+        t.get_vertexx(providers[stoi($3)]._begin_id)->meat[0].type_of_instruction = _type_of_meat::_ASS;
         logger.log(*t.get_vertexx(providers[stoi($3)]._begin_id));
         //logger.log("______" + t.get_vertexx(providers[$3]._begin_id)->meat[0].left + "_______");
         //logger.log("_________" + t.get_vertexx(providers[$3]._begin_id)->meat[0].expr.left + 
@@ -341,10 +346,15 @@ command:
     
     | READ IDENTIFIER SEMICOLON {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
+        Instruction instruction;
+        instruction.type_of_instruction = _type_of_meat::_READ;
+        instruction.right = Value($2);
         t.add_vertexx(id);
+        t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
         //logger.log("dodano vertex na READ z id: ", id);
         EdgeProvider provider;
         provider.set_begin_id(id);
@@ -357,10 +367,15 @@ command:
     | WRITE value SEMICOLON {
 
         if (head_sig) {
+            t.head_ids.push_back(id);
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
+        Instruction instruction;
+        instruction.type_of_instruction = _type_of_meat::_WRITE;
+        instruction.right = Value($2);
         t.add_vertexx(id);
+        t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
         //logger.log("dodano vertex na WRITE z id: ", id);
         EdgeProvider provider;
         provider.set_begin_id(id);
@@ -401,11 +416,14 @@ proc_declarations:
     }
 ;
 declarations:
-    declarations COMMA IDENTIFIER   {std::string to_send = $1 + ", " + $3; 
+    declarations COMMA IDENTIFIER   {
+        std::string to_send = $1 + ", " + $3; 
+        t.architecture.assert_var(clean_ID($3));
         $$=to_send; 
         //logger.log($$);
     }
     | IDENTIFIER {
+        t.architecture.assert_var(clean_ID($1));
         $$=$1;
     }
 ;
@@ -413,6 +431,7 @@ declarations:
 expression:
     value {
         if (head_sig) {
+            t.head_ids.push_back(id);
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -438,7 +457,8 @@ expression:
     }
     | value PLUS value {
         if (head_sig) {
-            logger.log("&&&codeblock glowa z id:",id);
+            t.head_ids.push_back(id);
+            logger.log("&&&codeb---lock glowa z id:",id);
         }
         head_sig = 0;
         t.add_vertexx(id);
@@ -464,6 +484,7 @@ expression:
     }
     | value MIN value {
         if (head_sig) {
+            t.head_ids.push_back(id);
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -490,6 +511,7 @@ expression:
     }
     | value MUL value {
         if (head_sig) {
+            t.head_ids.push_back(id);
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -515,7 +537,9 @@ expression:
         id++;
     }
     | value DIV value {
+        
         if (head_sig) {
+            t.head_ids.push_back(id);
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -542,6 +566,7 @@ expression:
     }
     | value MOD value {
         if (head_sig) {
+            t.head_ids.push_back(id);
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -570,6 +595,7 @@ expression:
 condition:
     value EQ value {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -598,6 +624,7 @@ condition:
     }
     |value NEQ value {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -624,6 +651,7 @@ condition:
     }
     |value LMORE value {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -650,6 +678,7 @@ condition:
     }
     |value LLESS value {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -676,6 +705,7 @@ condition:
     }
     |value LHEQ value {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -702,6 +732,7 @@ condition:
     }
     |value LLEQ value {
         if (head_sig) {
+            t.head_ids.push_back(id);;
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -757,8 +788,17 @@ void yyerror(const char* msg) {
 int handle()
 {
     int parsed = yyparse();
+    for (auto it : t.vertices) {
+        for (auto ins : it.meat) {
+            t.translate_ins(ins);
+        }
+    }
+    for (auto it : t._asm_instructions) {
+        logger.log(it.code + "  " + std::to_string(it._register->id));
+    }
     logger.log("test");
     logger.close_logger();
+    t.transform();
     t.save_to_csv("/tmp/graphs");
     //control_flow_graph.save_to_csv("/tmp/graphs");
     printf("to ja\n");
@@ -766,6 +806,13 @@ int handle()
     //auto x = control_flow_graph.get_edge(0,1)->label;
     //printf("%d\n", control_flow_graph.get_edge(0,1)->label);
     return parsed;
+}
+std::string clean_ID(std::string ID) {
+    std::string load = "";
+    for (int i = 3; i < ID.length(); i++) {
+                load += ID[i];
+    }
+    return load;
 }
 int main()
 {

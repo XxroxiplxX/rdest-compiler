@@ -33,7 +33,7 @@ struct Architecture {
     
     int var_p = 1;
     std::map<std::string, Register*> variables;
-    std::map<long long int, Register*> constants;
+    std::map<std::string, Register*> constants;
     void assert_var(std::string id) {
         //variables.insert({id, Register(var_p)});
         variables[id] = new Register(var_p);
@@ -59,21 +59,37 @@ struct AsmInstruction {
     std::string code;
     Register* _register;
     int constant;
-    AsmInstruction(std::string _code, Register* _r) : code(_code), _register(_r) {}
-    AsmInstruction(std::string _code, int _constant) : code(_code), constant(_constant) {}
+    int ip;
+    std::string label;
+    AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip) {}
+    AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label) {}
+    AsmInstruction(std::string _code, int _constant, int _ip) : code(_code), constant(_constant), ip(_ip) {}
+    AsmInstruction(std::string _code, int _constant, int _ip, std::string _label) : code(_code), constant(_constant), ip(_ip), label(_label) {}
 };
 class DirectedGraph {
     public:
     Logging::Logger log = Logging::Logger("translation.log");
     Architecture architecture;
+
+
     std::vector<CodeBlock> vertices;
+
+    std::vector<int> head_ids;
+
     std::vector<AsmInstruction> _asm_instructions;
     int instruction_pointer = 0;
     void add_vertexx(int v_id);
     void add_edge(int v_id, int u_id);
+    void transform();
+    void populate_neighbours(CodeBlock* codeblock);
     CodeBlock* get_vertexx(int v_id);
     void save_to_csv(std::string path);
     void translate_ins(Instruction ins);
+    void translate_assign(Instruction ins);
+    void translate_expression(Expression expr);
+    void _asm_read(Value val);
+    void _asm_write(Value val);
+    void _asm_add(Value left, Value right);
 };
 
 #endif //COMPILER_DIRECTEDGRAPH_H

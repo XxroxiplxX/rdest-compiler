@@ -10,6 +10,8 @@ namespace Logging {
             std::vector<std::string> log_list;
             std::string file_name;
             std::ofstream output;
+
+            
         public:
             void log(CodeBlock cb);
             Logger(std:: string filename) : file_name(filename) {
