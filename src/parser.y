@@ -192,7 +192,10 @@ procedures:
 main:
     PROGRAM IS VAR declarations BEGI commands END {
         printf("main detected\n");
-
+        auto lt = t.head_map.end();
+        lt--;
+        int last = lt->first;
+        t.head_map[last] = "main";
         std::string tmp_decl = "";
         for (int i = 0; i < ($4).length(); i++) {
             if ($4[i] == ',') {
@@ -206,10 +209,7 @@ main:
         t.architecture.assert_var(clean_ID(tmp_decl), "main");
         logger.log("database updated: " + tmp_decl + "-->" + "main");
 
-        auto lt = t.head_map.end();
-        lt--;
-        int last = lt->first;
-        t.head_map[last] = "main";
+        
     }
     | PROGRAM IS BEGI commands END {
         auto lt = t.head_map.end();
@@ -498,7 +498,7 @@ proc_declarations:
 ;
 declarations:
     declarations COMMA IDENTIFIER   {
-        std::string to_send = $1 + ", " + $3; 
+        std::string to_send = $1 + "," + $3; 
         //t.architecture.assert_var(clean_ID($3));
         $$=to_send; 
         //logger.log($$);
@@ -888,7 +888,7 @@ int handle()
     logger.log("test");
     logger.close_logger();
     t.transform();
-    //t.translate_main(0);
+    t.translate_main(0);
     t.save_to_csv("/tmp/graphs");
     //control_flow_graph.save_to_csv("/tmp/graphs");
     printf("to ja\n");

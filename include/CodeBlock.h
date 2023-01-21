@@ -89,11 +89,12 @@ class CodeBlock {
         std::vector<Instruction> meat;
         std::vector<CodeBlock*> nbrs_ptrs;
         CodeBlock(){}
+        int ip;
         int id;
         bool visited = false;
         bool translated = false;
         std::vector<int> neighbours;
-        
+        std::string proc_id;
         CodeBlock(int _id) :id(_id) {}
         
 

@@ -36,7 +36,7 @@ struct Memory {
     std::map<std::string, Register*> variables;
 };
 struct Architecture {
-    
+    Logging::Logger log = Logging::Logger("memory.log");
     int var_p = 1;
     //std::map<std::string, Register*> variables;
     std::map<std::string, Memory> procedures_memory;
@@ -44,6 +44,7 @@ struct Architecture {
     void assert_var(std::string id, std::string proc_id) {
         //variables.insert({id, Register(var_p)});
         procedures_memory[proc_id].variables[id] = new Register(var_p);
+        log.log("do pamieci dodano rejestr: @" + std::to_string(var_p) + " dla procedury : @" + proc_id + " i zmiennej: @" + id);
         var_p++;
     }
     void assert_arg(std::string id, std::string proc_id) {
@@ -58,27 +59,31 @@ struct Architecture {
             return -1;
         //}
     }
-    Register* get_register(std::string iden) {
+    Register* get_register(std::string iden, std::string proc_id) {
        // if (variables[iden]->state == State::_UNLOCKED) {
           //  return variables[iden];
        // } else {
-            return nullptr;
+            //return nullptr;
        // }
+        auto tmp_ptr = procedures_memory[proc_id].variables[iden];
+        log.log("pamiec przekazala rejestr: @" + std::to_string(tmp_ptr->id) + " dla procedury : @" + proc_id + " i zmiennej: @" + iden);
+        return tmp_ptr;
     }
 };
 struct AsmInstruction {
     std::string code;
     Register* _register;
-    int constant;
+    std::string constant;
     int ip;
     std::string label;
     std::string asm_to_string() {
         
     }
+    AsmInstruction(std::string _code) : code(_code), _register(nullptr), ip(-1) {}
     AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip) {}
     AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label) {}
-    AsmInstruction(std::string _code, int _constant, int _ip) : code(_code), constant(_constant), ip(_ip) {}
-    AsmInstruction(std::string _code, int _constant, int _ip, std::string _label) : code(_code), constant(_constant), ip(_ip), label(_label) {}
+    AsmInstruction(std::string _code, std::string _constant, int _ip) : code(_code), _register(nullptr), constant(_constant), ip(_ip) {}
+    AsmInstruction(std::string _code, std::string _constant, int _ip, std::string _label) : code(_code), _register(nullptr), constant(_constant), ip(_ip), label(_label) {}
 };
 class DirectedGraph {
     public:
@@ -95,17 +100,17 @@ class DirectedGraph {
     void add_vertexx(int v_id);
     void add_edge(int v_id, int u_id);
     void transform();
-    void populate_neighbours(CodeBlock* codeblock);
+    void populate_neighbours(CodeBlock* codeblock, std::string proc_id);
     void translate_snippet(CodeBlock* codeblock);
     CodeBlock* get_vertexx(int v_id);
     void save_to_csv(std::string path);
     void translate_main(int head_id);
-    void translate_ins(Instruction ins);
-    void translate_assign(Instruction ins);
-    void translate_expression(Expression expr);
-    void _asm_read(Value val);
-    void _asm_write(Value val);
-    void _asm_add(Value left, Value right);
+    void translate_ins(Instruction ins, CodeBlock* codeblock);
+    void translate_assign(Instruction ins, CodeBlock* codeblock);
+    void translate_expression(Expression expr, CodeBlock* codeblock);
+    void _asm_read(Value val, CodeBlock* codeblock);
+    void _asm_write(Value val, CodeBlock* codeblock);
+    void _asm_add(Value left, Value right, CodeBlock* CodeBlock);
     void _asm_sub(Value left, Value right);
     void _asm_mul(Value left, Value right);
     void _asm_div(Value left, Value right);
