@@ -12,6 +12,7 @@
 std::vector<EdgeProvider> providers;
 int yylex();
 std::string clean_ID(std::string ID);
+std::string clean_NUM(std::string NUM);
 void yyerror(const char *s);
 auto logger = Logging::Logger("logs.log");
 auto control_flow_graph = GraphLib::Graph<int, int>();
@@ -856,6 +857,7 @@ value:
          
          
          $$=$1;
+         t.architecture.assert_const(clean_NUM($1));
          //$<text>$= $<text>1;// + std::string($<text>1); 
          //$<type>$ = 1;
          //to_send + .c_str(); 
@@ -901,6 +903,13 @@ std::string clean_ID(std::string ID) {
     std::string load = "";
     for (int i = 3; i < ID.length(); i++) {
                 load += ID[i];
+    }
+    return load;
+}
+std::string clean_NUM(std::string NUM) {
+    std::string load = "";
+    for (int i = 4; i < NUM.length(); i++) {
+                load += NUM[i];
     }
     return load;
 }

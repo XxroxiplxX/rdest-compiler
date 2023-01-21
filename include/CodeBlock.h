@@ -9,11 +9,11 @@ enum type_of_value {
     _ID = 2
 };
 struct Value {
-    int type;
+    type_of_value type;
     std::string load="";
     bool is_arg = 0;
     Value() {
-        type = 0;
+        type = type_of_value::_ID;
     }
     std::string val_to_string() {
         return "%val% = %type:" + std::to_string(type) + "%load:" + load;

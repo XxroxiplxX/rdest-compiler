@@ -22,11 +22,15 @@ void DirectedGraph::translate_assign(Instruction ins, CodeBlock* codeblock) {
     instruction_pointer++;
 }
 void DirectedGraph::translate_expression(Expression expr, CodeBlock* codeblock) {
-    auto left_reg = architecture.get_register(expr.left.load, codeblock->proc_id);
-    if (left_reg->holds_argument) {
-        _asm_instructions.push_back(AsmInstruction("LOADI", left_reg, instruction_pointer));
+    if (expr.left.type = _ID) {
+        auto left_reg = architecture.get_register(expr.left.load, codeblock->proc_id);
+        if (left_reg->holds_argument) {
+            _asm_instructions.push_back(AsmInstruction("LOADI", left_reg, instruction_pointer));
+        } else {
+            _asm_instructions.push_back(AsmInstruction("LOAD", left_reg, instruction_pointer));
+        }
     } else {
-        _asm_instructions.push_back(AsmInstruction("LOAD", left_reg, instruction_pointer));
+        _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_constant(expr.left.load), instruction_pointer));
     }
     instruction_pointer++;
     switch(expr.type_of_operator) {

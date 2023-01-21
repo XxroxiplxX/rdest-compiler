@@ -22,7 +22,7 @@ struct Register {
     int id;
     State state;
     std::string range;
-    bool holds_argument = 0;;
+    bool holds_argument = 0;
     void lock() {
         state = _LOCKED;
     }
@@ -47,6 +47,11 @@ struct Architecture {
         log.log("do pamieci dodano rejestr: @" + std::to_string(var_p) + " dla procedury : @" + proc_id + " i zmiennej: @" + id);
         var_p++;
     }
+    void assert_const(std::string NUM) {
+        constants[NUM] = new Register(var_p);
+        log.log("do pamieci dodano stala: " + NUM + " na pozycji: " + std::to_string(var_p));
+        var_p++;
+    }
     void assert_arg(std::string id, std::string proc_id) {
         procedures_memory[proc_id].variables[id] = new Register(var_p, "arg");
         var_p++;
@@ -58,6 +63,11 @@ struct Architecture {
         //} else {
             return -1;
         //}
+    }
+    Register* get_constant(std::string NUM) {
+        auto tmp_ptr = constants[NUM];
+        log.log("pamiec przekazala rejestr: @" + std::to_string(tmp_ptr->id) + " dla stalej: @" + NUM);
+        return tmp_ptr;
     }
     Register* get_register(std::string iden, std::string proc_id) {
        // if (variables[iden]->state == State::_UNLOCKED) {
@@ -76,9 +86,7 @@ struct AsmInstruction {
     std::string constant;
     int ip;
     std::string label;
-    std::string asm_to_string() {
-        
-    }
+    
     AsmInstruction(std::string _code) : code(_code), _register(nullptr), ip(-1) {}
     AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip) {}
     AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label) {}
