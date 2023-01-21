@@ -108,10 +108,10 @@ class DirectedGraph {
     void translate_ins(Instruction ins, CodeBlock* codeblock);
     void translate_assign(Instruction ins, CodeBlock* codeblock);
     void translate_expression(Expression expr, CodeBlock* codeblock);
-    void _asm_read(Value val, CodeBlock* codeblock);
-    void _asm_write(Value val, CodeBlock* codeblock);
-    void _asm_add(Value left, Value right, CodeBlock* CodeBlock);
-    void _asm_sub(Value left, Value right);
+    void _asm_get(Value val, CodeBlock* codeblock);
+    void _asm_put(Value val, CodeBlock* codeblock);
+    void _asm_add(Value val, CodeBlock* CodeBlock);
+    void _asm_sub(Value val, CodeBlock* codeblock);
     void _asm_mul(Value left, Value right);
     void _asm_div(Value left, Value right);
     void _asm_mod(Value left, Value right);

@@ -1,44 +1,71 @@
 #include "../include/DirectedGraph.h"
-void DirectedGraph::_asm_read(Value val, CodeBlock* codeblock) {
+#include "DirectedGraph.h"
+void DirectedGraph::_asm_get(Value val, CodeBlock* codeblock) {
     _asm_instructions.push_back(AsmInstruction("GET", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
     instruction_pointer++;
 }
 void DirectedGraph::_asm_halt() {
     _asm_instructions.push_back(AsmInstruction("HALT"));
 }
-void DirectedGraph::_asm_write(Value val, CodeBlock* codeblock) {
+void DirectedGraph::_asm_put(Value val, CodeBlock* codeblock) {
     _asm_instructions.push_back(AsmInstruction("PUT", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
     instruction_pointer++;
 }
 void DirectedGraph::translate_assign(Instruction ins, CodeBlock* codeblock) {
     translate_expression(ins.expr, codeblock);
-    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_register(ins.left.load, codeblock->proc_id), instruction_pointer));
+    auto left_reg = architecture.get_register(ins.left.load, codeblock->proc_id);
+    if (left_reg->holds_argument) {
+        _asm_instructions.push_back(AsmInstruction("STOREI", left_reg, instruction_pointer));
+    } else {
+        _asm_instructions.push_back(AsmInstruction("STORE", left_reg, instruction_pointer));
+    }
     instruction_pointer++;
 }
 void DirectedGraph::translate_expression(Expression expr, CodeBlock* codeblock) {
-    _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(expr.left.load, codeblock->proc_id), instruction_pointer));
+    auto left_reg = architecture.get_register(expr.left.load, codeblock->proc_id);
+    if (left_reg->holds_argument) {
+        _asm_instructions.push_back(AsmInstruction("LOADI", left_reg, instruction_pointer));
+    } else {
+        _asm_instructions.push_back(AsmInstruction("LOAD", left_reg, instruction_pointer));
+    }
     instruction_pointer++;
     switch(expr.type_of_operator) {
         case _ADD:
             //log.log("chce postawic add");
-            _asm_add(expr.left, expr.right, codeblock);
+            _asm_add(expr.right, codeblock);
             break;
     }
 }
-void DirectedGraph::_asm_add(Value left, Value right, CodeBlock* codeblock) {
-    log.log("prosze o rejestr procedury: " + codeblock->proc_id + " dla zmiennej: " + right.load);
-    _asm_instructions.push_back(AsmInstruction("ADD", architecture.get_register(right.load, codeblock->proc_id), instruction_pointer));
+void DirectedGraph::_asm_add(Value val, CodeBlock* codeblock) {
+    log.log("prosze o rejestr procedury: " + codeblock->proc_id + " dla zmiennej: " + val.load);
+    auto val_reg = architecture.get_register(val.load, codeblock->proc_id);
+    if (val_reg->holds_argument) {
+        _asm_instructions.push_back(AsmInstruction("ADDI", val_reg, instruction_pointer));
+    } else {
+        _asm_instructions.push_back(AsmInstruction("ADD", val_reg, instruction_pointer));
+    }
     instruction_pointer++;
 }
+void DirectedGraph::_asm_sub(Value val, CodeBlock* codeblock) {
+    log.log("prosze o rejestr procedury: " + codeblock->proc_id + " dla zmiennej: " + val.load);
+    auto val_reg = architecture.get_register(val.load, codeblock->proc_id);
+    if (val_reg->holds_argument) {
+        _asm_instructions.push_back(AsmInstruction("SUBI", val_reg, instruction_pointer));
+    } else {
+        _asm_instructions.push_back(AsmInstruction("SUB", val_reg, instruction_pointer));
+    }
+    instruction_pointer++;
+}
+
 void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
     switch (ins.type_of_instruction) {
         case _COND:
             break;
         case _READ:
-            _asm_read(ins.right, codeblock);
+            _asm_get(ins.right, codeblock);
             break;
         case _WRITE:
-            _asm_write(ins.right, codeblock);
+            _asm_put(ins.right, codeblock);
             break;
         case _ASS:
             translate_assign(ins, codeblock);
