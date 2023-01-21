@@ -1,10 +1,13 @@
 #include "../include/DirectedGraph.h"
 void DirectedGraph::_asm_read(Value val) {
-    _asm_instructions.push_back(AsmInstruction("READ", architecture.get_register(val.load), instruction_pointer));
+    _asm_instructions.push_back(AsmInstruction("GET", architecture.get_register(val.load), instruction_pointer));
     instruction_pointer++;
 }
+void DirectedGraph::_asm_halt() {
+    
+}
 void DirectedGraph::_asm_write(Value val) {
-    _asm_instructions.push_back(AsmInstruction("WRITE", architecture.get_register(val.load), instruction_pointer));
+    _asm_instructions.push_back(AsmInstruction("PUT", architecture.get_register(val.load), instruction_pointer));
     instruction_pointer++;
 }
 void DirectedGraph::translate_assign(Instruction ins) {
@@ -44,10 +47,10 @@ void DirectedGraph::translate_ins(Instruction ins) {
             break;
     }
     //translacja ID := ID + ID;
-    architecture.assert_var("a");
-    architecture.assert_var("b");
-    architecture.assert_var("c");
-    log.log("utoworzono rejestry zmiennych a b c");
+    //architecture.assert_var("a");
+    //architecture.assert_var("b");
+    //architecture.assert_var("c");
+    //log.log("utoworzono rejestry zmiennych a b c");
     //_asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register("b")));
     //_asm_instructions.push_back(AsmInstruction("ADD", architecture.get_register("c")));
     //_asm_instructions.push_back(AsmInstruction("STORE", architecture.get_register("a")));
@@ -74,13 +77,18 @@ void DirectedGraph::add_edge(int v_id, int u_id) {
     }
 }
 void DirectedGraph::populate_neighbours(CodeBlock* codeblock) {
-   
-        for (auto nbr : codeblock->neighbours) {
-            auto tmp = get_vertexx(nbr);
-            codeblock->nbrs_ptrs.push_back(tmp);
-            populate_neighbours(tmp);
-        
-    }
+   if (codeblock->visited) {
+       return;
+   } else {
+       codeblock->visited = 1;
+       for (auto nbr: codeblock->neighbours) {
+           log.log("linkuje vertex: ", nbr);
+           auto tmp = get_vertexx(nbr);
+           codeblock->nbrs_ptrs.push_back(tmp);
+           populate_neighbours(tmp);
+
+       }
+   }
 }
 void DirectedGraph::transform() {
     CodeBlock* tmp;
@@ -107,11 +115,32 @@ void DirectedGraph::save_to_csv(std::string path) {
             
         }*/
         for (int i = 0; i < vertices.size(); i++) {
-            for (int j = 0; j < vertices[i].nbrs_ptrs.size(); j++) {
-                outdata_e << vertices[i].id << ";" << vertices[i].nbrs_ptrs[j]->id << std::endl;
+            for (int j = 0; j < vertices[i].neighbours.size(); j++) {
+                outdata_e << vertices[i].id << ";" << vertices[i].neighbours[j] << std::endl;
                 //std::cout << vertices[i].id << ";" << vertices[i].neighbours[j] << std::endl;
             }
             
         }
         outdata_e.close();
+}
+void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
+    if (codeblock->translated) {
+        return;
+    } else {
+        for (auto instruction : codeblock->meat) {
+            translate_ins(instruction);
+        }
+        codeblock->translated = 1;
+        for (auto nbr : codeblock->nbrs_ptrs) {
+            translate_snippet(nbr);
+        }
     }
+}
+void DirectedGraph::translate_main(int head_id) {
+    auto head = get_vertexx(head_id);
+    translate_snippet(head);
+    for (auto asmins : _asm_instructions) {
+        log.log(asmins.code + "        " + std::to_string(asmins._register->id));
+    }
+
+}

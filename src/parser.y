@@ -79,15 +79,26 @@ program_all:
 ;
 procedures:
     procedures PROCEDURE proc_head IS VAR proc_declarations BEGI commands END    {
+
+        
+
         head_sig = 1;
         std::string proc_name = $3;
         std::string proc_id = "";
         int no_of_args = 0;
         int bracket = 0;
+        std::string tmp_id = "";
+        std::vector<std::string> tmp_args;
         for (int i = 0; i < proc_name.length(); i++) {
             if (bracket) {
                 if (proc_name[i] == ',') {
                     no_of_args++;
+                    tmp_args.push_back(clean_ID(tmp_id));
+                    tmp_id = "";
+                } else {
+                    if (proc_name[i] != ')') {
+                        tmp_id += proc_name[i];
+                    }
                 }
             } else {
                 if (proc_name[i] == '(') {
@@ -100,9 +111,32 @@ procedures:
                 }
             }
         }
+        tmp_args.push_back(clean_ID(tmp_id));
         no_of_args++;
         proc_id += std::to_string(no_of_args);
+        for (auto it : tmp_args) {
+            logger.log("argument procedury: " + proc_id + " o etykiecie: " + it);
+            t.architecture.assert_arg(it, proc_id); //build database with proc args
+        }
         procs.push_back(proc_id);
+        //t.head_map.end()->second = proc_id;
+        auto lt = t.head_map.end();
+        lt--;
+        int last = lt->first;
+        t.head_map[last] = proc_id;
+        /*handle proc declarations*/
+        std::string tmp_decl = "";
+        for (int i = 0; i < ($6).length(); i++) {
+            if ($6[i] == ',') {
+                t.architecture.assert_var(clean_ID(tmp_decl), proc_id);
+                logger.log("database updated: " + tmp_decl + "-->" + proc_id);
+                tmp_decl = "";
+            } else {
+                tmp_decl += $6[i];
+            }
+        }
+        t.architecture.assert_var(clean_ID(tmp_decl), proc_id);
+        logger.log("database updated: " + tmp_decl + "-->" + proc_id);
         logger.log("###definicja: " + proc_id);
         
     }
@@ -113,10 +147,18 @@ procedures:
         logger.log("to parse: " + proc_name);
         int no_of_args = 0;
         int bracket = 0;
+        std::string tmp_id = "";
+        std::vector<std::string> tmp_args;
         for (int i = 0; i < proc_name.length(); i++) {
             if (bracket) {
                 if (proc_name[i] == ',') {
                     no_of_args++;
+                    tmp_args.push_back(clean_ID(tmp_id));
+                    tmp_id = "";
+                } else {
+                    if (proc_name[i] != ')') {
+                        tmp_id += proc_name[i];
+                    }
                 }
             } else {
                 if (proc_name[i] == '(') {
@@ -129,17 +171,53 @@ procedures:
                 }
             }
         }
+        tmp_args.push_back(clean_ID(tmp_id));
         no_of_args++;
         proc_id += std::to_string(no_of_args);
+        for (auto it : tmp_args) {
+            logger.log("argument procedury: " + proc_id + " o etykiecie: " + it);
+            t.architecture.assert_arg(it, proc_id); //build database with proc args
+        }
         procs.push_back(proc_id);
+        //t.head_map.end()->second = proc_id;
+        auto lt = t.head_map.end();
+        lt--;
+        int last = lt->first;
+        t.head_map[last] = proc_id;
         logger.log("###definicja: " + proc_id);
         
     }
     | %empty {printf("no procedures\n");}
 ;
 main:
-    PROGRAM IS VAR declarations BEGI commands END {printf("main detected\n");}
-    | PROGRAM IS BEGI commands END
+    PROGRAM IS VAR declarations BEGI commands END {
+        printf("main detected\n");
+
+        std::string tmp_decl = "";
+        for (int i = 0; i < ($4).length(); i++) {
+            if ($4[i] == ',') {
+                t.architecture.assert_var(clean_ID(tmp_decl), "main");
+                logger.log("database updated: " + tmp_decl + "-->" + "main");
+                tmp_decl = "";
+            } else {
+                tmp_decl += $4[i];
+            }
+        }
+        t.architecture.assert_var(clean_ID(tmp_decl), "main");
+        logger.log("database updated: " + tmp_decl + "-->" + "main");
+
+        auto lt = t.head_map.end();
+        lt--;
+        int last = lt->first;
+        t.head_map[last] = "main";
+    }
+    | PROGRAM IS BEGI commands END {
+        auto lt = t.head_map.end();
+        lt--;
+        int last = lt->first;
+        t.head_map[last] = "main";
+        //t.head_map.end()->second = "main";
+    }
 ;
 commands:
     commands command    {
@@ -186,7 +264,8 @@ commands:
 command:
     proc_head SEMICOLON {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -346,7 +425,8 @@ command:
     
     | READ IDENTIFIER SEMICOLON {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -368,6 +448,7 @@ command:
 
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -418,12 +499,12 @@ proc_declarations:
 declarations:
     declarations COMMA IDENTIFIER   {
         std::string to_send = $1 + ", " + $3; 
-        t.architecture.assert_var(clean_ID($3));
+        //t.architecture.assert_var(clean_ID($3));
         $$=to_send; 
         //logger.log($$);
     }
     | IDENTIFIER {
-        t.architecture.assert_var(clean_ID($1));
+        //t.architecture.assert_var(clean_ID($1));
         $$=$1;
     }
 ;
@@ -432,6 +513,7 @@ expression:
     value {
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -458,6 +540,7 @@ expression:
     | value PLUS value {
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeb---lock glowa z id:",id);
         }
         head_sig = 0;
@@ -485,6 +568,7 @@ expression:
     | value MIN value {
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -512,6 +596,7 @@ expression:
     | value MUL value {
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -540,6 +625,7 @@ expression:
         
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -567,6 +653,7 @@ expression:
     | value MOD value {
         if (head_sig) {
             t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -595,7 +682,8 @@ expression:
 condition:
     value EQ value {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -624,7 +712,8 @@ condition:
     }
     |value NEQ value {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -651,7 +740,8 @@ condition:
     }
     |value LMORE value {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -678,7 +768,8 @@ condition:
     }
     |value LLESS value {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -705,7 +796,8 @@ condition:
     }
     |value LHEQ value {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -732,7 +824,8 @@ condition:
     }
     |value LLEQ value {
         if (head_sig) {
-            t.head_ids.push_back(id);;
+            t.head_ids.push_back(id);
+            t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
         head_sig = 0;
@@ -788,17 +881,14 @@ void yyerror(const char* msg) {
 int handle()
 {
     int parsed = yyparse();
-    for (auto it : t.vertices) {
-        for (auto ins : it.meat) {
-            t.translate_ins(ins);
-        }
+    for (auto it : t.head_map) {
+        std::cout << it.first << "-->" << it.second << std::endl;
     }
-    for (auto it : t._asm_instructions) {
-        logger.log(it.code + "  " + std::to_string(it._register->id));
-    }
+
     logger.log("test");
     logger.close_logger();
     t.transform();
+    //t.translate_main(0);
     t.save_to_csv("/tmp/graphs");
     //control_flow_graph.save_to_csv("/tmp/graphs");
     printf("to ja\n");

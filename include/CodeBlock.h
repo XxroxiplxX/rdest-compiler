@@ -11,6 +11,7 @@ enum type_of_value {
 struct Value {
     int type;
     std::string load="";
+    bool is_arg = 0;
     Value() {
         type = 0;
     }
@@ -89,6 +90,8 @@ class CodeBlock {
         std::vector<CodeBlock*> nbrs_ptrs;
         CodeBlock(){}
         int id;
+        bool visited = false;
+        bool translated = false;
         std::vector<int> neighbours;
         
         CodeBlock(int _id) :id(_id) {}
