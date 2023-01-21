@@ -60,7 +60,13 @@ void DirectedGraph::_asm_sub(Value val, CodeBlock* codeblock) {
     }
     instruction_pointer++;
 }
-
+void DirectedGraph::translate_condition(Instruction ins, CodeBlock* codeblock) {
+    switch(ins.type_of_operator) {
+        case _LLESS:
+            
+            break;
+    }
+}
 void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
     switch (ins.type_of_instruction) {
         case _COND:
@@ -104,7 +110,14 @@ CodeBlock* DirectedGraph::get_vertexx(int v_id) {
 
 void DirectedGraph::add_edge(int v_id, int u_id) {
     try {
-        get_vertexx(v_id)->neighbours.push_back(u_id);
+        get_vertexx(v_id)->neighbours[1] = u_id;
+    } catch (const char* msg) {
+        std::cerr << msg << std::endl;
+    }
+}
+void DirectedGraph::add_edge(int v_id, int u_id, bool flag) {
+    try {
+        get_vertexx(v_id)->neighbours[flag] = u_id;
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
     }
@@ -116,9 +129,9 @@ void DirectedGraph::populate_neighbours(CodeBlock* codeblock, std::string proc_i
        codeblock->visited = 1;
        codeblock->proc_id = proc_id;
        for (auto nbr: codeblock->neighbours) {
-           log.log("linkuje vertex: ", nbr);
-           auto tmp = get_vertexx(nbr);
-           codeblock->nbrs_ptrs.push_back(tmp);
+           log.log("linkuje vertex: ", nbr.second);
+           auto tmp = get_vertexx(nbr.second);
+           codeblock->nbrs_ptrs[nbr.first] = tmp;
            populate_neighbours(tmp, proc_id);
 
        }
@@ -167,7 +180,7 @@ void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
         }
         codeblock->translated = 1;
         for (auto nbr : codeblock->nbrs_ptrs) {
-            translate_snippet(nbr);
+            translate_snippet(nbr.second);
         }
     }
 }

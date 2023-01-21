@@ -345,8 +345,8 @@ command:
             //control_flow_graph.add_vertex(id);
             //logger.log("zredukowano IF ELSE");
             EdgeProvider provider;  //provider for
-            t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id);   //condition ma ten sam poczatek i koniec
-            t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($6)]._begin_id);
+            t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id, true);   //condition ma ten sam poczatek i koniec
+            t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($6)]._begin_id, false);
             provider._begin_id = providers[stoi($2)]._begin_id;
             /*
             for (int i = 0; i < providers[$4]._end_ids.size(); i++) {
@@ -374,8 +374,8 @@ command:
             //logger.log(msg);
             t.add_vertexx(id);
             EdgeProvider provider;  //provider for
-            t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id);   //condidtion->commands
-            t.add_edge(providers[stoi($2)]._begin_id, id);    //condition->endif
+            t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id, true);   //condidtion->commands
+            t.add_edge(providers[stoi($2)]._begin_id, id, false);    //condition->endif
             t.add_edge(providers[stoi($4)]._end_id, id);  //end of command->endif
             provider._begin_id = providers[stoi($4)]._begin_id;
             provider._end_id = id;;    //koniec ifa to endif
@@ -394,14 +394,14 @@ command:
         msg += std::to_string(providers[stoi($4)]._begin_id);
         //logger.log(msg);
         EdgeProvider provider;  //provider for
-        t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id);   //\
+        t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id, true);   //\
         condition->begin of commands
         provider._begin_id = providers[stoi($2)]._begin_id;   
         t.add_vertexx(id);
         t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id); //end of commands->\
         condition
         
-        t.add_edge(providers[stoi($2)]._begin_id, id);    //condition->endwhile
+        t.add_edge(providers[stoi($2)]._begin_id, id, false);    //condition->endwhile
         provider._end_id = id;
         providers.push_back(provider);
         $$=std::to_string(id);
@@ -413,12 +413,15 @@ command:
         EdgeProvider provider;  //provider for
         t.add_edge(providers[stoi($2)]._end_id, providers[stoi($4)]._begin_id);   //\
         end of commands->condition
-        provider._begin_id = providers[stoi($2)]._begin_id;   
+        //provider._begin_id = providers[stoi($2)]._begin_id;   
         
-        t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id); //condition->begin\
+        t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id, false); //condition->begin\
         of commands
+        t.add_vertexx(id);
+        t.add_edge(providers[stoi($4)]._end_id, id , true);
         provider._begin_id = providers[stoi($2)]._end_id;
-        provider._end_id = providers[stoi($4)]._end_id;
+        //provider._end_id = providers[stoi($4)]._end_id;
+        provider._end_id = id;
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;

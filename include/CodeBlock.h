@@ -4,6 +4,7 @@
 
 #include <vector>
 #include<string>
+#include <map>
 enum type_of_value {
     _NUM = 1,
     _ID = 2
@@ -87,13 +88,16 @@ struct Instruction {
 class CodeBlock {
     public:
         std::vector<Instruction> meat;
-        std::vector<CodeBlock*> nbrs_ptrs;
+        
+        //std::vector<CodeBlock*> nbrs_ptrs;
+        std::map<bool, CodeBlock*> nbrs_ptrs;
         CodeBlock(){}
         int ip;
         int id;
         bool visited = false;
         bool translated = false;
-        std::vector<int> neighbours;
+        //std::vector<int> neighbours;
+        std::map<bool, int> neighbours;
         std::string proc_id;
         CodeBlock(int _id) :id(_id) {}
         

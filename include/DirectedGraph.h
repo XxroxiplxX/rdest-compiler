@@ -107,6 +107,7 @@ class DirectedGraph {
     int instruction_pointer = 0;
     void add_vertexx(int v_id);
     void add_edge(int v_id, int u_id);
+    void add_edge(int v_id, int u_id, bool flag);
     void transform();
     void populate_neighbours(CodeBlock* codeblock, std::string proc_id);
     void translate_snippet(CodeBlock* codeblock);
@@ -116,6 +117,7 @@ class DirectedGraph {
     void translate_ins(Instruction ins, CodeBlock* codeblock);
     void translate_assign(Instruction ins, CodeBlock* codeblock);
     void translate_expression(Expression expr, CodeBlock* codeblock);
+    void translate_condition(Instruction ins, CodeBlock* codeblock);
     void _asm_get(Value val, CodeBlock* codeblock);
     void _asm_put(Value val, CodeBlock* codeblock);
     void _asm_add(Value val, CodeBlock* CodeBlock);
