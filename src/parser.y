@@ -80,9 +80,6 @@ program_all:
 ;
 procedures:
     procedures PROCEDURE proc_head IS VAR proc_declarations BEGI commands END    {
-
-        
-
         head_sig = 1;
         std::string proc_name = $3;
         std::string proc_id = "";

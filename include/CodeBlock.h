@@ -44,7 +44,9 @@ enum _type_of_meat {
     _WRITE = 3,
     _ASS = 4,
     _CALL = 16,
-    _EMPTY = 0
+    _EMPTY = 0,
+    _HALT = 100,
+    _RET = 101
 } ;
 
 enum _type_of_operator {
