@@ -241,6 +241,7 @@ commands:
         if (providers[stoi($1)].get_end_id() == 0) {
             printf("AAAAAAAAAAAAAAAAAAAAAAAAAA\n");
         }
+        logger.log(msg);
         t.add_edge(providers[stoi($1)]._end_id, providers[stoi($2)]._begin_id);
         //t.get_vertexx(providers[$1]._end_id)->neighbours.push_back(providers[$2]._begin_id);
         //logger.log(msg);
@@ -578,7 +579,7 @@ expression:
         head_sig = 0;
         t.add_vertexx(id);
         Expression expression;
-        expression.type_of_operator = _type_of_operator::_DIV;
+        expression.type_of_operator = _type_of_operator::_SUB;
         //expression.left = $<text>1;
         //expression.right = $<text>3;
         expression.left = Value($1);

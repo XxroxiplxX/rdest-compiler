@@ -85,13 +85,15 @@ struct AsmInstruction {
     Register* _register;
     std::string constant;
     int ip;
+    int jump_address = -1;
     std::string label;
-    
-    AsmInstruction(std::string _code) : code(_code), _register(nullptr), ip(-1) {}
-    AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip) {}
-    AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label) {}
-    AsmInstruction(std::string _code, std::string _constant, int _ip) : code(_code), _register(nullptr), constant(_constant), ip(_ip) {}
-    AsmInstruction(std::string _code, std::string _constant, int _ip, std::string _label) : code(_code), _register(nullptr), constant(_constant), ip(_ip), label(_label) {}
+    CodeBlock* codeblock;
+    AsmInstruction(std::string _code, CodeBlock* _to_jump, int _ip) : code(_code), _register(nullptr), ip(_ip), codeblock(_to_jump) {}
+    AsmInstruction(std::string _code) : code(_code), _register(nullptr), ip(-1), codeblock(nullptr) {}
+    AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip), codeblock(nullptr) {}
+    AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label), codeblock(nullptr) {}
+    AsmInstruction(std::string _code, std::string _constant, int _ip) : code(_code), _register(nullptr), constant(_constant), ip(_ip), codeblock(nullptr) {}
+    AsmInstruction(std::string _code, std::string _constant, int _ip, std::string _label) : code(_code), _register(nullptr), constant(_constant), ip(_ip), label(_label), codeblock(nullptr) {}
 };
 class DirectedGraph {
     public:
@@ -109,6 +111,7 @@ class DirectedGraph {
     void add_edge(int v_id, int u_id);
     void add_edge(int v_id, int u_id, bool flag);
     void transform();
+    void resolve_jumps();
     void populate_neighbours(CodeBlock* codeblock, std::string proc_id);
     void translate_snippet(CodeBlock* codeblock);
     CodeBlock* get_vertexx(int v_id);
@@ -118,6 +121,11 @@ class DirectedGraph {
     void translate_assign(Instruction ins, CodeBlock* codeblock);
     void translate_expression(Expression expr, CodeBlock* codeblock);
     void translate_condition(Instruction ins, CodeBlock* codeblock);
+    void _asm_cmp_lower(Value left, Value right, CodeBlock* codeblock);
+    void _asm_cmp_eq(Value left, Value right, CodeBlock* codeblock);
+    void _asm_cmp_leq(Value left, Value right, CodeBlock* codeblock);
+    void _asm_load(Value val, CodeBlock* codeblock);
+    void _asm_store(Value val, CodeBlock* codeblock);
     void _asm_get(Value val, CodeBlock* codeblock);
     void _asm_put(Value val, CodeBlock* codeblock);
     void _asm_add(Value val, CodeBlock* CodeBlock);
