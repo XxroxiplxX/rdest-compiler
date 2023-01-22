@@ -44,9 +44,7 @@ enum _type_of_meat {
     _WRITE = 3,
     _ASS = 4,
     _CALL = 16,
-    _EMPTY = 0,
-    _HALT = 100,
-    _RET = 101
+    _EMPTY = 0
 } ;
 
 enum _type_of_operator {
@@ -78,6 +76,7 @@ struct Instruction {
     Value right;
     Expression expr;
     std::vector<Value> args;
+    std::string proc_id;
     std::string to_asm() {
         //switch (type_of_instruction) {
           //  case _type_of_meat::_ASS:

@@ -116,6 +116,7 @@ procedures:
             logger.log("argument procedury: " + proc_id + " o etykiecie: " + it);
             t.architecture.assert_arg(it, proc_id); //build database with proc args
         }
+        t.architecture.assert_ret_reg(proc_id);
         procs.push_back(proc_id);
         //t.head_map.end()->second = proc_id;
         auto lt = t.head_map.end();
@@ -132,8 +133,15 @@ procedures:
             } else {
                 tmp_decl += $6[i];
             }
-        }
+        }/*
+        t.add_vertexx(id);
+        Instruction instruction;
+        instruction.type_of_instruction = _type_of_meat::_RET;
+        t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
+        t.add_edge(providers[stoi($8)]._end_id, id);
+        id++;*/
         t.architecture.assert_var(clean_ID(tmp_decl), proc_id);
+        t.architecture.assert_var(proc_id, proc_id);    //adres powrotu
         logger.log("database updated: " + tmp_decl + "-->" + proc_id);
         logger.log("###definicja: " + proc_id);
         
@@ -176,13 +184,22 @@ procedures:
             logger.log("argument procedury: " + proc_id + " o etykiecie: " + it);
             t.architecture.assert_arg(it, proc_id); //build database with proc args
         }
+        t.architecture.assert_ret_reg(proc_id);
         procs.push_back(proc_id);
+        t.architecture.assert_var(proc_id, proc_id);    //adres powrotu
         //t.head_map.end()->second = proc_id;
         auto lt = t.head_map.end();
         lt--;
         int last = lt->first;
         t.head_map[last] = proc_id;
         logger.log("###definicja: " + proc_id);
+        //t.add_vertexx(id);
+        //id++;
+        //Instruction instruction;
+        //instruction.type_of_instruction = _type_of_meat::_RET;
+        //t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
+        //t.add_edge(providers[stoi($6)]._end_id, id);
+        //id++;
         
     }
     | %empty {printf("no procedures\n");}
@@ -204,12 +221,26 @@ main:
                 tmp_decl += $4[i];
             }
         }
+        //t.add_vertexx(id);
+        //Instruction instruction;
+        //instruction.type_of_instruction = _type_of_meat::_HALT;
+        //t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
+        //t.add_edge(providers[stoi($6)]._end_id, id);
+        //id++;
         t.architecture.assert_var(clean_ID(tmp_decl), "main");
         logger.log("database updated: " + tmp_decl + "-->" + "main");
 
         
     }
     | PROGRAM IS BEGI commands END {
+
+        //id++;
+        //t.add_vertexx(id);
+        //Instruction instruction;
+        //instruction.type_of_instruction = _type_of_meat::_HALT;
+        //t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
+        //t.add_edge(providers[stoi($4)]._end_id, id);
+        
         auto lt = t.head_map.end();
         lt--;
         int last = lt->first;
@@ -297,6 +328,7 @@ command:
         for (auto it : procs) {
             if(it == name) {
                 c++;
+                instruction.proc_id = name;
                 logger.log("rzeczona nazwa to------------->" + it);
                 //logger.log("procedura zadeklarowana nazwa- " + proc);
                 t.add_vertexx(id);
@@ -891,7 +923,7 @@ int handle()
     logger.log("test");
     logger.close_logger();
     t.transform();
-    t.translate_main(0);
+    t.translate_main();
     t.save_to_csv("/tmp/graphs");
     //control_flow_graph.save_to_csv("/tmp/graphs");
     printf("to ja\n");

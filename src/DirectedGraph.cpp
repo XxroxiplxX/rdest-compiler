@@ -4,8 +4,9 @@ void DirectedGraph::_asm_get(Value val, CodeBlock* codeblock) {
     _asm_instructions.push_back(AsmInstruction("GET", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
     instruction_pointer++;
 }
-void DirectedGraph::_asm_halt() {
-    _asm_instructions.push_back(AsmInstruction("HALT"));
+void DirectedGraph::_asm_halt(CodeBlock* codeblock) {
+    _asm_instructions.push_back(AsmInstruction("HALT", instruction_pointer));
+    instruction_pointer++;
 }
 void DirectedGraph::_asm_put(Value val, CodeBlock* codeblock) {
     _asm_instructions.push_back(AsmInstruction("PUT", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
@@ -115,6 +116,10 @@ void DirectedGraph::_asm_cmp_leq(Value left, Value right, CodeBlock* codeblock) 
     _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->nbrs_ptrs[false], instruction_pointer));
     instruction_pointer++;
 }
+void DirectedGraph::_asm_jump_i(std::string proc_id) {
+    _asm_instructions.push_back(AsmInstruction("JUMPI", architecture.get_ret_reg(proc_id), instruction_pointer));
+    instruction_pointer++;
+}
 void DirectedGraph::translate_condition(Instruction ins, CodeBlock* codeblock) {
     switch(ins.type_of_operator) {
         case _LLESS:
@@ -134,7 +139,33 @@ void DirectedGraph::translate_condition(Instruction ins, CodeBlock* codeblock) {
             break;
     }
 }
+void DirectedGraph::translate_call(Instruction ins, CodeBlock* codeblock) {
+    std::string proc_to_jump = ins.proc_id;
+    log.log("wewnatrz procedury: " + codeblock->proc_id + " tlumacze calla do procedury: " + proc_to_jump);
+    for (int i = 0; i < ins.args.size(); i++) {
+        _asm_load(ins.args[i], codeblock);
+        std::string id_want_to_store = architecture.procedures_memory[proc_to_jump].arg_ids[i];
+        _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_register(id_want_to_store, proc_to_jump), instruction_pointer));
+        instruction_pointer++;
+        log.log("zapakowalem argument: " + id_want_to_store);
+    }
+    _asm_instructions.push_back(AsmInstruction("SET", std::to_string(instruction_pointer + 2), instruction_pointer)); //lokalizacja powrotu
+    log.log("ustawilem adres powrotu na: ", instruction_pointer + 2);
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_ret_reg(proc_to_jump), instruction_pointer));
+    instruction_pointer++;
+    
+    int id_of_proc_head;
+    for (auto proc_head : head_map) {
+        if (proc_head.second == proc_to_jump) {
+            id_of_proc_head = proc_head.first;
+        }
+    }
+    log.log("skacze do procedury, ktorej glowa ma numer: ", id_of_proc_head);
+    _asm_instructions.push_back(AsmInstruction("JUMP", get_vertexx(id_of_proc_head), instruction_pointer));
+}
 void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
+    log.log("tlumacze instrukcje w procedurze: " + codeblock->proc_id);
     switch (ins.type_of_instruction) {
         case _COND:
             translate_condition(ins, codeblock);
@@ -149,6 +180,7 @@ void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
             translate_assign(ins, codeblock);
             break;
         case _CALL:
+            translate_call(ins, codeblock);
             break;
         case _EMPTY:
             break;
@@ -191,6 +223,7 @@ void DirectedGraph::add_edge(int v_id, int u_id, bool flag) {
     }
 }
 void DirectedGraph::populate_neighbours(CodeBlock* codeblock, std::string proc_id) {
+   
    if (codeblock->visited) {
        return;
    } else {
@@ -227,6 +260,7 @@ void DirectedGraph::transform() {
         std::cout << "glowa no        " << head.first << "id: " << head.second << std::endl;
         populate_neighbours(tmp, head.second);
     }
+    std::cout << "skonczylem transformacje\n";
     save_to_csv("/tmp/graphs");
 }
 
@@ -257,31 +291,64 @@ void DirectedGraph::save_to_csv(std::string path) {
         outdata_e.close();
 }
 void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
+    log.log("trans");
     if (codeblock->translated) {
         return;
     } else {
+        //std::cout <<"adres"<< codeblock << std::endl;;
         codeblock->ip = instruction_pointer;    //stad bede wiedzial gdzie skakac
         for (auto instruction : codeblock->meat) {
             translate_ins(instruction, codeblock);
             log.log("tlumacze instrukcje w codeblocku: ", codeblock->id);
         }
         codeblock->translated = 1;
+        log.log("before if");
+        log.log("size ", codeblock->nbrs_ptrs.size());
+        if (codeblock->nbrs_ptrs.size() == 0) {
+            log.log("trafilem na koniec");
+            if (codeblock->proc_id == "main") {
+                _asm_halt(codeblock);
+            } else {
+                _asm_jump_i(codeblock->proc_id);
+            }
+            
+        }
+        log.log("after if");
+
+        
+
         for (auto nbr : codeblock->nbrs_ptrs) {
+            log.log("in loop");
+            log.log("moi sasiedzi to: " , nbr.first);
+            log.log(*codeblock);
+            
+            std::cout << nbr.second << std::endl;
+            log.log("@@@@@@2");
+            log.log(*nbr.second);
             translate_snippet(nbr.second);
+            //log.log("wyjebalem sie");
         }
     }
 }
-void DirectedGraph::translate_main(int head_id) {
-    auto head = get_vertexx(head_id);
-    translate_snippet(head);
-    resolve_jumps();
+void DirectedGraph::translate_main() {
+    for (auto it : head_ids) {
+        auto head = get_vertexx(it);
+        log.log("tlumacze head z id: ", it);
+        translate_snippet(head);
+    }
+    log.log("------teraz skoski-------");
+    resolve_jumps();/*
     for (auto asmins : _asm_instructions) {
         if (asmins.jump_address == -1) {
-            log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins._register->id));
+            if (asmins._register != nullptr) {
+                log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins._register->id));
+            } else {
+                log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " );
+            }
         } else {
             log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins.jump_address));
         }
-    }
+    }*/
 
 }
 void DirectedGraph:: resolve_jumps() {
