@@ -386,6 +386,7 @@ command:
                 provider._end_ids.push_back(providers[$6]._end_ids[i]);
             }*/
             t.add_vertexx(id);  //empty for endif
+            t.vertices[t.vertices.size() - 1].empty = 1;
             t.add_edge(providers[stoi($4)]._end_id, id);
             t.add_edge(providers[stoi($6)]._end_id, id);
             provider._end_id = id;
@@ -403,6 +404,7 @@ command:
             msg += std::to_string(providers[stoi($4)]._begin_id);
             //logger.log(msg);
             t.add_vertexx(id);
+            t.vertices[t.vertices.size() - 1].empty = 1;
             EdgeProvider provider;  //provider for
             t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id, true);   //condidtion->commands
             t.add_edge(providers[stoi($2)]._begin_id, id, false);    //condition->endif
@@ -428,6 +430,7 @@ command:
         condition->begin of commands
         provider._begin_id = providers[stoi($2)]._begin_id;   
         t.add_vertexx(id);
+        t.vertices[t.vertices.size() - 1].empty = 1;
         t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id); //end of commands->\
         condition
         
@@ -448,6 +451,7 @@ command:
         t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id, false); //condition->begin\
         of commands
         t.add_vertexx(id);
+        t.vertices[t.vertices.size() - 1].empty = 1;
         t.add_edge(providers[stoi($4)]._end_id, id , true);
         provider._begin_id = providers[stoi($2)]._end_id;
         //provider._end_id = providers[stoi($4)]._end_id;

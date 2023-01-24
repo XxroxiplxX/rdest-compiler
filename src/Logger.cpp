@@ -12,6 +12,8 @@ namespace Logging {
     void Logger::log(CodeBlock cb) {
         output << "************************************\n";
         output << "********#codeblock id : " << cb.id << std::endl;
+        output << "--------next_true: " << cb.next_true_id << std::endl;
+        output << "--------next_false: " << cb.next_false_id << std::endl;
         for (auto it : cb.meat) {
             output << "@@@@Loading instuction...\n";
             output << "type_of_instruction: " << it.type_of_instruction << std::endl;

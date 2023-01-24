@@ -43,6 +43,33 @@ struct Architecture {
     //std::map<std::string, Register*> variables;
     std::map<std::string, Memory> procedures_memory;
     std::map<std::string, Register*> constants;
+    Register* op_1;
+    Register* op_2;
+    Register* mul_trash;
+    Register* mul_prod;
+    void assert_ops() {
+        op_1 = new Register(var_p);
+        var_p++;
+        op_2 = new Register(var_p);
+        var_p++;
+        mul_trash = new Register(var_p);
+        var_p++;
+        mul_prod = new Register(var_p);
+        var_p++;
+        log.log("do pamieci dodano rejestry operacji");
+    }
+    Register* get_mul_prod() {
+        return mul_prod;
+    }
+    Register* get_mul_trash() {
+        return mul_trash;
+    }
+    Register* get_op_1() {
+        return op_1;
+    }
+    Register* get_op_2() {
+        return op_2;
+    }
     void assert_var(std::string id, std::string proc_id) {
         //variables.insert({id, Register(var_p)});
         procedures_memory[proc_id].variables[id] = new Register(var_p);
@@ -95,16 +122,21 @@ struct Architecture {
 struct AsmInstruction {
     std::string code;
     Register* _register;
-    std::string constant;
+    std::string constant = "";
     int ip;
     int jump_address = -1;
     std::string label;
     CodeBlock* codeblock;
     AsmInstruction(std::string _code, CodeBlock* _to_jump, int _ip) : code(_code), _register(nullptr), ip(_ip), codeblock(_to_jump) {}
+
     AsmInstruction(std::string _code, int _ip) : code(_code), _register(nullptr), ip(_ip), codeblock(nullptr) {}
+
     AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip), codeblock(nullptr) {}
+
     AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label), codeblock(nullptr) {}
+
     AsmInstruction(std::string _code, std::string _constant, int _ip) : code(_code), _register(nullptr), constant(_constant), ip(_ip), codeblock(nullptr) {}
+
     AsmInstruction(std::string _code, std::string _constant, int _ip, std::string _label) : code(_code), _register(nullptr), constant(_constant), ip(_ip), label(_label), codeblock(nullptr) {}
 };
 class DirectedGraph {
@@ -112,13 +144,25 @@ class DirectedGraph {
     Logging::Logger log = Logging::Logger("translation.log");
     Architecture architecture;
 
-
+    int end_blocks = 1000;
     std::vector<CodeBlock> vertices;
 
     std::vector<int> head_ids;
     std::map<int, std::string> head_map;
     std::vector<AsmInstruction> _asm_instructions;
     int instruction_pointer = 0;
+    void _asm_push_base(std::string signature, Register* address) {
+        _asm_instructions.push_back(AsmInstruction(signature, address, instruction_pointer));
+        instruction_pointer++;
+    }
+    void _asm_push_base(std::string signature, Register* address, std::string _label) {
+        _asm_instructions.push_back(AsmInstruction(signature, address, instruction_pointer, _label + std::to_string(instruction_pointer) + "]"));
+        instruction_pointer++;
+    }
+    void _asm_push_base(std::string signature, std::string var_name, std::string proc_id) {
+        _asm_instructions.push_back(AsmInstruction(signature, architecture.get_register(var_name, proc_id), instruction_pointer));
+        instruction_pointer++;
+    }
     void add_vertexx(int v_id);
     void add_edge(int v_id, int u_id);
     void add_edge(int v_id, int u_id, bool flag);
@@ -129,6 +173,8 @@ class DirectedGraph {
     CodeBlock* get_vertexx(int v_id);
     void save_to_csv(std::string path);
     void translate_main();
+    void resolve_consts();
+    void _asm_set_constants();
     void translate_ins(Instruction ins, CodeBlock* codeblock);
     void translate_assign(Instruction ins, CodeBlock* codeblock);
     void translate_expression(Expression expr, CodeBlock* codeblock);
@@ -143,7 +189,7 @@ class DirectedGraph {
     void _asm_put(Value val, CodeBlock* codeblock);
     void _asm_add(Value val, CodeBlock* CodeBlock);
     void _asm_sub(Value val, CodeBlock* codeblock);
-    void _asm_mul(Value left, Value right);
+    void _asm_mul(Value left, Value right, CodeBlock* codeblock);
     void _asm_div(Value left, Value right);
     void _asm_mod(Value left, Value right);
     void _asm_halt(CodeBlock* codeblock);

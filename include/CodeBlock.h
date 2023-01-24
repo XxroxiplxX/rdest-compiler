@@ -91,16 +91,32 @@ class CodeBlock {
         std::vector<Instruction> meat;
         
         //std::vector<CodeBlock*> nbrs_ptrs;
-        std::map<bool, CodeBlock*> nbrs_ptrs;
-        CodeBlock(){}
+        //std::map<bool, CodeBlock*> nbrs_ptrs;
+        CodeBlock* next_true; //= nullptr;
+        CodeBlock* next_false; //= nullptr;
+        CodeBlock(){
+            //next_false = nullptr;
+            //next_true = nullptr;
+            //next_false_id = -1;
+            //next_true_id = -1;
+        }
+        bool empty = 0;
+        bool last = 0;
         int ip;
         int id;
         bool visited = false;
         bool translated = false;
+        int next_true_id; // = -1;
+        int next_false_id; // = -1;
         //std::vector<int> neighbours;
-        std::map<bool, int> neighbours;
+        //std::map<bool, int> neighbours;
         std::string proc_id;
-        CodeBlock(int _id) :id(_id) {}
+        CodeBlock(int _id) :id(_id) {
+            next_true= nullptr;
+            next_false= nullptr;
+            next_true_id = -1;
+            next_false_id = -1;
+        }
         
 
 };
