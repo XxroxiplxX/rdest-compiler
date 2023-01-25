@@ -44,7 +44,8 @@ enum _type_of_meat {
     _WRITE = 3,
     _ASS = 4,
     _CALL = 16,
-    _EMPTY = 0
+    _ENDWHILE = 17
+
 } ;
 
 enum _type_of_operator {
@@ -70,6 +71,7 @@ struct Expression {
     }
 };
 struct Instruction {
+    bool _while_cond = 0;
     _type_of_meat type_of_instruction;
     int type_of_operator;
     Value left;

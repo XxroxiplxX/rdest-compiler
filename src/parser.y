@@ -285,6 +285,7 @@ commands:
 
         $$=std::to_string(id);
         id++;
+        logger.log("good");
 
     }
     | command   {
@@ -431,9 +432,10 @@ command:
         provider._begin_id = providers[stoi($2)]._begin_id;   
         t.add_vertexx(id);
         t.vertices[t.vertices.size() - 1].empty = 1;
+        //t.vertices[t.vertices.size() - 1].type_of_instruction = _type_of_meat::_ENDWHILE;
         t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id); //end of commands->\
         condition
-        
+        t.get_vertexx(providers[stoi($2)]._begin_id)->meat[0]._while_cond = 1;
         t.add_edge(providers[stoi($2)]._begin_id, id, false);    //condition->endwhile
         provider._end_id = id;
         providers.push_back(provider);
@@ -444,20 +446,29 @@ command:
     }
     | REPEAT commands UNTIL condition SEMICOLON {
         EdgeProvider provider;  //provider for
+        logger.log("1");
         t.add_edge(providers[stoi($2)]._end_id, providers[stoi($4)]._begin_id);   //\
         end of commands->condition
         //provider._begin_id = providers[stoi($2)]._begin_id;   
-        
+        logger.log("2");
         t.add_edge(providers[stoi($4)]._end_id, providers[stoi($2)]._begin_id, false); //condition->begin\
         of commands
+        logger.log("3");
         t.add_vertexx(id);
+        logger.log("4");
         t.vertices[t.vertices.size() - 1].empty = 1;
+        logger.log("5");
         t.add_edge(providers[stoi($4)]._end_id, id , true);
-        provider._begin_id = providers[stoi($2)]._end_id;
+        logger.log("6");
+        provider._begin_id = providers[stoi($2)]._begin_id;
+        logger.log("7");
         //provider._end_id = providers[stoi($4)]._end_id;
         provider._end_id = id;
+        logger.log("8");
         providers.push_back(provider);
+        logger.log("9");
         $$=std::to_string(id);
+        logger.log("10");
         id++;
     }
     
@@ -724,6 +735,7 @@ condition:
             t.head_map[id] = "";
             logger.log("&&&codeblock glowa z id:",id);
         }
+        logger.log("zyje");
         head_sig = 0;
         //logger.log("@@@@COND" + std::string($<text>1) + " = " + std::string($<text>3) + "@@@@");
         t.add_vertexx(id);
@@ -736,7 +748,7 @@ condition:
         //instruction.left = $1;
         //instruction.right = $3;
         t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
-        logger.log(t.vertices[id]);
+        //logger.log(t.vertices[id]);
         //codeblock.meat.push_back(instruction);
         //t.get_vertexx(id)->codeblock = codeblock;
         logger.log("@@@condition: " + instruction.left.load + " = " + instruction.right.load + "---->"
@@ -747,6 +759,7 @@ condition:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
+        logger.log("done");
     }
     |value NEQ value {
         if (head_sig) {

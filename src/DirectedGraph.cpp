@@ -11,8 +11,15 @@ void DirectedGraph::_asm_halt(CodeBlock* codeblock) {
     
 }
 void DirectedGraph::_asm_put(Value val, CodeBlock* codeblock) {
-    _asm_instructions.push_back(AsmInstruction("PUT", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
+    log.log("#write");
+    if (val.type == _ID) {
+        _asm_instructions.push_back(AsmInstruction("PUT", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
+    } else {    //case const
+        _asm_instructions.push_back(AsmInstruction("PUT", architecture.get_constant(val.load), instruction_pointer));
+    }
     instruction_pointer++;
+    
+    log.log("ok");
     
 }
 void DirectedGraph::_asm_load(Value val, CodeBlock* codeblock) {
@@ -58,22 +65,33 @@ void DirectedGraph::translate_expression(Expression expr, CodeBlock* codeblock) 
             break;
         case _MUL:
             _asm_mul(expr.left, expr.right, codeblock);
-
+            break;
+        case _DIV:
+            _asm_div(expr.left, expr.right, codeblock);
             break;
         
     }
 }
-void DirectedGraph::_asm_set_constants() {
-    architecture.assert_const("1");
-
-    
-        _asm_instructions.push_back(AsmInstruction("SET", "1", instruction_pointer));
-        instruction_pointer++;
-        _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_constant("1"), instruction_pointer));
-        instruction_pointer++;
+void DirectedGraph::_asm_set_op_constants() {
+    /*stala do mnozenia*/
+    //architecture.assert_const("1");
+    architecture.initialize_num_constant();
+    _asm_instructions.push_back(AsmInstruction("SET", "1", instruction_pointer));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_one(), instruction_pointer));
+    instruction_pointer++;
     
 }
+void DirectedGraph::_asm_set_external_constants() {
+    for (auto const_reg : architecture.constants) {
+        _asm_instructions.push_back(AsmInstruction("SET", const_reg.first, instruction_pointer));
+        instruction_pointer++;
+        _asm_instructions.push_back(AsmInstruction("STORE", const_reg.second, instruction_pointer));
+        instruction_pointer++;
+    }
+}
 void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
+    //TODO add reset
     log.log("wszedlem");
     if (architecture.get_mul_prod() == nullptr) {
         log.log("error mul prod");
@@ -87,58 +105,174 @@ void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
     if (architecture.get_mul_trash() == nullptr) {
         log.log("error mul trash");
     }
-    _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(left.load, codeblock->proc_id), instruction_pointer));
-    instruction_pointer++;
+    
+    _asm_load(left, codeblock);
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_1(), instruction_pointer));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(right.load, codeblock->proc_id), instruction_pointer));
-    instruction_pointer++;
+    
+    _asm_load(right, codeblock);
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_2(), instruction_pointer));
     instruction_pointer++;
 
-    _asm_push_base("PUT", architecture.get_op_1());
-    _asm_push_base("PUT", architecture.get_op_2());
-    _asm_push_base("PUT", architecture.get_mul_prod());
-    _asm_push_base("PUT", architecture.get_mul_trash());
-
+    log.log("gotowe");
     int _zero = instruction_pointer;
+    _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_op_1(), instruction_pointer, "      [loop, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 23), instruction_pointer, "      [jzero end, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
     _asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_op_2(), instruction_pointer, "      [loop, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 21), instruction_pointer, "      [jzero end, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 23), instruction_pointer, "      [jzero end, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
     _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
     instruction_pointer++;
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_mul_trash(), instruction_pointer));
     instruction_pointer++;
-
+    log.log("eee");
 
     _asm_push_base("LOAD", architecture.get_op_2());
-    _asm_push_base("ADD", architecture.get_constant("1"));
+    _asm_push_base("ADD", architecture.get_one());
+    log.log("eee");
     _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
     instruction_pointer++;
     _asm_push_base("SUB", architecture.get_mul_trash());
-    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 10), instruction_pointer, "      [jzero ins, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 12), instruction_pointer, "      [jzero ins, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 17), instruction_pointer, "      [jump odd, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 19), instruction_pointer, "      [jump odd, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_push_base("LOAD", architecture.get_op_1(), "[ins, k = ");
+    _asm_push_base("LOAD", architecture.get_op_1(), "   [ins, k = ");
     _asm_push_base("ADD", architecture.get_op_1());
     _asm_push_base("STORE", architecture.get_op_1());
     _asm_push_base("LOAD", architecture.get_op_2());
      _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
     instruction_pointer++;
+    log.log("eee");
     _asm_push_base("STORE", architecture.get_op_2());
     _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero), instruction_pointer, "      [jump loop, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
     _asm_push_base("LOAD", architecture.get_op_1());
     _asm_push_base("ADD", architecture.get_mul_prod());
     _asm_push_base("STORE", architecture.get_mul_prod());
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 10), instruction_pointer, "      [jump ins, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 12), instruction_pointer, "      [jump ins, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_push_base("LOAD", architecture.get_mul_prod(), "[end, k = ");
+    _asm_push_base("LOAD", architecture.get_mul_prod(), "   [end, k = ");
+    log.log("pomnozone");
+    architecture.get_mul_prod()->id = architecture.var_p;
+    architecture.var_p++;
+    architecture.get_mul_trash()->id = architecture.var_p;
+    log.log("zmieniono adres mul_trash na: ", architecture.get_mul_trash()->id);
+    log.log("zmieniono adres mul_prod na: ", architecture.get_mul_prod()->id);
+    architecture.var_p++;
     log.log("skonczylem");
     //w akumulatorze powinien byc wynik mnozenia
 
+}
+void DirectedGraph::_asm_div(Value left, Value right, CodeBlock* codeblock) {
+    //TODO add external registers withiut reset
+    log.log("dziele");
+    //_asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(left.load, codeblock->proc_id), instruction_pointer));
+    //instruction_pointer++;
+    _asm_load(left, codeblock);
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_1(), instruction_pointer));
+    instruction_pointer++;
+    //_asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(right.load, codeblock->proc_id), instruction_pointer));
+    //instruction_pointer++;
+    _asm_load(right, codeblock);
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_2(), instruction_pointer));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_div_C(), instruction_pointer));
+    instruction_pointer++;
+
+    int _zero = instruction_pointer;
+//pre  
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [pre, k = ");
+    _asm_push_base("SUB", architecture.get_op_1());
+     _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer));
+    instruction_pointer++;
+    _asm_push_base("STORE", architecture.get_div_Q());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 50), instruction_pointer, "      [jpos shr, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    
+//init
+    _asm_push_base("LOAD", architecture.get_op_1(), "       [init, k = ");
+    _asm_push_base("SUB", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 12), instruction_pointer, "      [jpos shr, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;//
+    _asm_push_base("LOAD", architecture.get_op_2());
+    _asm_push_base("SUB", architecture.get_op_1());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 31), instruction_pointer, "      [jzero isVal, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 16), instruction_pointer, "      [jump start, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+
+//shr
+    _asm_push_base("LOAD", architecture.get_op_2());
+    _asm_push_base("ADD", architecture.get_op_2());
+    _asm_push_base("STORE", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 5), instruction_pointer, "      [jump init, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//start
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [start, k = ");
+    _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
+    instruction_pointer++;
+    _asm_push_base("STORE", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 20), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//isValid
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [isValid, k = ");
+    _asm_push_base("SUB", architecture.get_div_C());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 27), instruction_pointer, "      [jpos valid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_push_base("LOAD", architecture.get_div_C());
+    _asm_push_base("SUB", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 27), instruction_pointer, "      [jzero valid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 50), instruction_pointer, "      [jump end, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//valid
+    _asm_push_base("LOAD", architecture.get_op_1(), "       [valid, k = ");
+    _asm_push_base("SUB", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 31), instruction_pointer, "      [jpos kon, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 42), instruction_pointer, "      [jzero sprawdzmy, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//kon
+    _asm_push_base("STORE", architecture.get_div_R(), "     [kon, k = ");
+    _asm_push_base("STORE", architecture.get_op_1());
+    _asm_push_base("LOAD", architecture.get_div_Q());
+    _asm_push_base("ADD", architecture.get_div_Q());
+    _asm_push_base("ADD", architecture.get_one());
+    _asm_push_base("STORE", architecture.get_div_Q());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 38), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//changeY
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [changeY, k = ");
+    _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
+    instruction_pointer++;
+    _asm_push_base("STORE", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 20), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//sprawdzmy
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [sprawdzmy, k = ");
+    _asm_push_base("SUB", architecture.get_op_1());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 31), instruction_pointer, "      [jzero kon, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 46), instruction_pointer, "      [jump cant, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//cant
+    _asm_push_base("LOAD", architecture.get_div_Q(), "      [cant, k = ");
+    _asm_push_base("ADD", architecture.get_div_Q());
+    _asm_push_base("STORE", architecture.get_div_Q());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 38), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//end
+    _asm_push_base("LOAD", architecture.get_div_Q(), "      [end, k = ");
+    
+    architecture.get_div_Q()->id = architecture.var_p;
+    architecture.var_p++;
+    architecture.get_div_R()->id = architecture.var_p;
+    architecture.var_p++;
+    
 }
 void DirectedGraph::_asm_add(Value val, CodeBlock* codeblock) {
     log.log("prosze o rejestr procedury: " + codeblock->proc_id + " dla zmiennej: " + val.load);
@@ -204,6 +338,9 @@ void DirectedGraph::_asm_jump_i(std::string proc_id) {
     _asm_instructions.push_back(AsmInstruction("JUMPI", architecture.get_ret_reg(proc_id), instruction_pointer));
     instruction_pointer++;
 }
+void DirectedGraph::_asm_clean_op_regs() {
+    
+}
 void DirectedGraph::translate_condition(Instruction ins, CodeBlock* codeblock) {
     switch(ins.type_of_operator) {
         case _LLESS:
@@ -224,6 +361,7 @@ void DirectedGraph::translate_condition(Instruction ins, CodeBlock* codeblock) {
     }
 }
 void DirectedGraph::translate_call(Instruction ins, CodeBlock* codeblock) {
+    //TODO change registers insinde another procedures
     std::string proc_to_jump = ins.proc_id;
     log.log("wewnatrz procedury: " + codeblock->proc_id + " tlumacze calla do procedury: " + proc_to_jump);
     for (int i = 0; i < ins.args.size(); i++) {
@@ -258,37 +396,43 @@ void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
     log.log("tlumacze instrukcje w procedurze: " + codeblock->proc_id);
     switch (ins.type_of_instruction) {
         case _COND:
+            log.log("translacja warunku");
             translate_condition(ins, codeblock);
             break;
         case _READ:
+            log.log("translacja READ");
             _asm_get(ins.right, codeblock);
-            if (codeblock->next_true != nullptr and codeblock->next_true->empty) {
+            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
                 _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
                 instruction_pointer++;
             }
             break;
         case _WRITE:
+        log.log("translacja WRITE");
             _asm_put(ins.right, codeblock);
-            if (codeblock->next_true != nullptr and codeblock->next_true->empty) {
+            log.log("done");
+            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
                 _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
                 instruction_pointer++;
             }
             break;
         case _ASS:
+        log.log("tlumacze ass");
             translate_assign(ins, codeblock);
-            if (codeblock->next_true != nullptr and codeblock->next_true->empty) {
+            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
                 _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
                 instruction_pointer++;
             }
             break;
         case _CALL:
             translate_call(ins, codeblock);
-            if (codeblock->next_true != nullptr and codeblock->next_true->empty) {
+            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
                 _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
                 instruction_pointer++;
             }
             break;
-        case _EMPTY:
+        case _ENDWHILE:
+            
             break;
     }
     //translacja ID := ID + ID;
@@ -404,7 +548,7 @@ void DirectedGraph::transform() {
         std :: cout << v.id << "        " << v.proc_id << std::endl;
     }
     std::cout << "skonczylem transformacje\n";
-    //save_to_csv("/tmp/graphs");
+    save_to_csv("/tmp/graphs");
 }
 
 void DirectedGraph::save_to_csv(std::string path) {
@@ -474,9 +618,14 @@ void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
     log.log("aaaa");
 }
 void DirectedGraph::translate_main() {
-    architecture.assert_const("c_1");
-    architecture.assert_ops();
-    _asm_set_constants();
+    //architecture.assert_const("c_1");
+    //architecture.assert_ops();
+    architecture.initialize_mul_registers();
+    architecture.initialize_div_registers();
+    
+
+    _asm_set_op_constants();
+    _asm_set_external_constants();
     for (auto it : head_map) {
         if (it.second == "main") {
             auto head = get_vertexx(it.first);
@@ -497,15 +646,15 @@ void DirectedGraph::translate_main() {
     for (auto asmins : _asm_instructions) {
         if (asmins.jump_address == -1) {
             if (asmins._register != nullptr) {
-                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins._register->id) + asmins.constant);
-                log.log( "   " + asmins.code + "        " + std::to_string(asmins._register->id) + asmins.constant + asmins.label);
+                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins._register->id) + asmins.constant + asmins.label);
+                log.log( "   " + asmins.code + "        " + std::to_string(asmins.reg_id) + asmins.constant + asmins.label);
             } else {
-                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " +asmins.constant);
-                                log.log("   " + asmins.code + "        " +asmins.constant + asmins.label);
+                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " +asmins.constant + asmins.label);
+                           log.log("   " + asmins.code + "        " +asmins.constant + asmins.label);
 
             }
         } else {
-            //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins.jump_address) + asmins.constant);
+                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins.jump_address) + asmins.constant + asmins.label);
                    log.log("   " + asmins.code + "        " + std::to_string(asmins.jump_address) + asmins.constant + asmins.label);
 
         }

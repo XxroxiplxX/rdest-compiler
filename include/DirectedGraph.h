@@ -43,11 +43,22 @@ struct Architecture {
     //std::map<std::string, Register*> variables;
     std::map<std::string, Memory> procedures_memory;
     std::map<std::string, Register*> constants;
+    
     Register* op_1;
     Register* op_2;
     Register* mul_trash;
     Register* mul_prod;
-    void assert_ops() {
+    Register* one_const;
+    Register* div_X;
+    Register* div_Y;
+    Register* div_Q;
+    Register* div_R;
+    Register* div_C;
+    void initialize_num_constant() {
+        one_const = new Register(var_p);
+        var_p++;
+    }
+    void initialize_mul_registers() {
         op_1 = new Register(var_p);
         var_p++;
         op_2 = new Register(var_p);
@@ -56,12 +67,50 @@ struct Architecture {
         var_p++;
         mul_prod = new Register(var_p);
         var_p++;
-        log.log("do pamieci dodano rejestry operacji");
+        log.log("do pamieci dodano rejestry operacji mnozenia");
+        log.log("mul_trash ma id: ", mul_trash->id);
+        log.log("mul_prod ma id: ", mul_prod->id);
+    }
+    void initialize_div_registers() {
+        div_X = new Register(var_p);
+        var_p++;
+        div_Y = new Register(var_p);
+        var_p++;
+        div_Q = new Register(var_p);
+        var_p++;
+        div_R = new Register(var_p);
+        var_p++;
+        div_C = new Register(var_p);
+        var_p++;
+        log.log("do pamieci dodano rejestry operacji dzielenia");
+        log.log("div_C ma id: ", div_C->id);
+    }
+    Register* get_one() {
+        return one_const;
+    }
+    Register* get_div_X() {
+        return div_X;
+    }
+    Register* get_div_Y() {
+        return div_Y;
+    }
+    Register* get_div_R() {
+        log.log("Pamiec przekazala rejestr div_R o id: ", div_R->id);
+        return div_R;
+    }
+    Register* get_div_Q() {
+        log.log("Pamiec przekazala rejestr div_Q o id: ", div_Q->id);
+        return div_Q;
+    }
+    Register* get_div_C() {
+        return div_C;
     }
     Register* get_mul_prod() {
+        log.log("Pamiec przekazala rejestr mul_prod o id: ", mul_prod->id);
         return mul_prod;
     }
     Register* get_mul_trash() {
+        log.log("Pamiec przekazala rejestr mul_trash o id: ", mul_trash->id);
         return mul_trash;
     }
     Register* get_op_1() {
@@ -79,6 +128,7 @@ struct Architecture {
     void assert_ret_reg(std::string proc_id) {
         log.log("do pamieci dodano rejestr powrotu dla procedury: " + proc_id);
         procedures_memory[proc_id].ret_reg = new Register(var_p);
+        var_p++;
     }
     Register* get_ret_reg(std::string proc_id) {
         return procedures_memory[proc_id].ret_reg;
@@ -122,6 +172,7 @@ struct Architecture {
 struct AsmInstruction {
     std::string code;
     Register* _register;
+    int reg_id;
     std::string constant = "";
     int ip;
     int jump_address = -1;
@@ -131,9 +182,9 @@ struct AsmInstruction {
 
     AsmInstruction(std::string _code, int _ip) : code(_code), _register(nullptr), ip(_ip), codeblock(nullptr) {}
 
-    AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip), codeblock(nullptr) {}
+    AsmInstruction(std::string _code, Register* _r, int _ip) : code(_code), _register(_r), ip(_ip), codeblock(nullptr), reg_id(_r->id) {}
 
-    AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label), codeblock(nullptr) {}
+    AsmInstruction(std::string _code, Register* _r, int _ip, std::string _label) : code(_code), _register(_r), ip(_ip), label(_label), codeblock(nullptr), reg_id(_r->id) {}
 
     AsmInstruction(std::string _code, std::string _constant, int _ip) : code(_code), _register(nullptr), constant(_constant), ip(_ip), codeblock(nullptr) {}
 
@@ -173,8 +224,8 @@ class DirectedGraph {
     CodeBlock* get_vertexx(int v_id);
     void save_to_csv(std::string path);
     void translate_main();
-    void resolve_consts();
-    void _asm_set_constants();
+    void _asm_set_op_constants();
+    void _asm_set_external_constants();
     void translate_ins(Instruction ins, CodeBlock* codeblock);
     void translate_assign(Instruction ins, CodeBlock* codeblock);
     void translate_expression(Expression expr, CodeBlock* codeblock);
@@ -190,10 +241,11 @@ class DirectedGraph {
     void _asm_add(Value val, CodeBlock* CodeBlock);
     void _asm_sub(Value val, CodeBlock* codeblock);
     void _asm_mul(Value left, Value right, CodeBlock* codeblock);
-    void _asm_div(Value left, Value right);
-    void _asm_mod(Value left, Value right);
+    void _asm_div(Value left, Value right, CodeBlock* codeblock);
+    void _asm_mod(Value left, Value right, CodeBlock* codeblock);
     void _asm_halt(CodeBlock* codeblock);
     void _asm_jump_i(std::string proc_id);
+    void _asm_clean_op_regs();
     void _return();
 };
 
