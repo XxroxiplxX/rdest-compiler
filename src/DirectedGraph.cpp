@@ -105,7 +105,10 @@ void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
     if (architecture.get_mul_trash() == nullptr) {
         log.log("error mul trash");
     }
-    
+    _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_mul_prod(), instruction_pointer));
+    instruction_pointer++;
     _asm_load(left, codeblock);
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_1(), instruction_pointer));
     instruction_pointer++;
@@ -157,12 +160,7 @@ void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
     instruction_pointer++;
     _asm_push_base("LOAD", architecture.get_mul_prod(), "   [end, k = ");
     log.log("pomnozone");
-    architecture.get_mul_prod()->id = architecture.var_p;
-    architecture.var_p++;
-    architecture.get_mul_trash()->id = architecture.var_p;
-    log.log("zmieniono adres mul_trash na: ", architecture.get_mul_trash()->id);
-    log.log("zmieniono adres mul_prod na: ", architecture.get_mul_prod()->id);
-    architecture.var_p++;
+    
     log.log("skonczylem");
     //w akumulatorze powinien byc wynik mnozenia
 
@@ -172,6 +170,11 @@ void DirectedGraph::_asm_div(Value left, Value right, CodeBlock* codeblock) {
     log.log("dziele");
     //_asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(left.load, codeblock->proc_id), instruction_pointer));
     //instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_div_Q(), instruction_pointer));
+    instruction_pointer++;
+
     _asm_load(left, codeblock);
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_1(), instruction_pointer));
     instruction_pointer++;
@@ -268,10 +271,7 @@ void DirectedGraph::_asm_div(Value left, Value right, CodeBlock* codeblock) {
 //end
     _asm_push_base("LOAD", architecture.get_div_Q(), "      [end, k = ");
     
-    architecture.get_div_Q()->id = architecture.var_p;
-    architecture.var_p++;
-    architecture.get_div_R()->id = architecture.var_p;
-    architecture.var_p++;
+    
     
 }
 void DirectedGraph::_asm_add(Value val, CodeBlock* codeblock) {
