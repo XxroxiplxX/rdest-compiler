@@ -4,10 +4,12 @@
 #include <iostream>
 #include <cstdlib>
 #include "parsery.hpp"
+
+#include "Logger.h"
 int yylex();
 int lex(int token);
 int lnum(int token);
-int lines = 1;
+int currentLine = 1;
 
 using namespace std;
 
@@ -134,9 +136,9 @@ using namespace std;
     yylval = ID;    return IDENTIFIER;
     }
 
-\n          {  lines++;}
+\r|\r\n|\n          {  currentLine++;}
 [[:space:]] { }
-. { ECHO;}
+. { std::cout << "invalid character in line: " << currentLine; exit(1);}
 %%
 
 

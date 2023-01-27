@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "CodeBlock.h"
+//static int currentLine = 1;
 namespace Logging {
     class Logger {
             std::vector<std::string> log_list;

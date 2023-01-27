@@ -69,6 +69,9 @@ void DirectedGraph::translate_expression(Expression expr, CodeBlock* codeblock) 
         case _DIV:
             _asm_div(expr.left, expr.right, codeblock);
             break;
+        case _MOD:
+            _asm_mod(expr.left, expr.right, codeblock);
+            break;
         
     }
 }
@@ -91,7 +94,7 @@ void DirectedGraph::_asm_set_external_constants() {
     }
 }
 void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
-    //TODO add reset
+    
     log.log("wszedlem");
     if (architecture.get_mul_prod() == nullptr) {
         log.log("error mul prod");
@@ -166,20 +169,12 @@ void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
 
 }
 void DirectedGraph::_asm_div(Value left, Value right, CodeBlock* codeblock) {
-    //TODO add external registers withiut reset
+    
     log.log("dziele");
-    //_asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(left.load, codeblock->proc_id), instruction_pointer));
-    //instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer));
-    instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_div_Q(), instruction_pointer));
-    instruction_pointer++;
-
+   
     _asm_load(left, codeblock);
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_1(), instruction_pointer));
     instruction_pointer++;
-    //_asm_instructions.push_back(AsmInstruction("LOAD", architecture.get_register(right.load, codeblock->proc_id), instruction_pointer));
-    //instruction_pointer++;
     _asm_load(right, codeblock);
     _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_2(), instruction_pointer));
     instruction_pointer++;
@@ -188,56 +183,59 @@ void DirectedGraph::_asm_div(Value left, Value right, CodeBlock* codeblock) {
 
     int _zero = instruction_pointer;
 //pre  
-    _asm_push_base("LOAD", architecture.get_op_2(), "       [pre, k = ");
-    _asm_push_base("SUB", architecture.get_op_1());
-     _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer));
+    _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer, "      [pre, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
     _asm_push_base("STORE", architecture.get_div_Q());
-    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 50), instruction_pointer, "      [jpos shr, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_push_base("LOAD", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 51), instruction_pointer, "      [jpos end, k = " + std::to_string(instruction_pointer) + "]")); //div by 0
+    instruction_pointer++;
+    _asm_push_base("SUB", architecture.get_op_1());
+    
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 51), instruction_pointer, "      [jpos end, k = " + std::to_string(instruction_pointer) + "]")); // 4/5
     instruction_pointer++;
     
 //init
     _asm_push_base("LOAD", architecture.get_op_1(), "       [init, k = ");
     _asm_push_base("SUB", architecture.get_op_2());
-    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 12), instruction_pointer, "      [jpos shr, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 13), instruction_pointer, "      [jpos shr, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;//
     _asm_push_base("LOAD", architecture.get_op_2());
     _asm_push_base("SUB", architecture.get_op_1());
-    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 31), instruction_pointer, "      [jzero isVal, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 32), instruction_pointer, "      [jzero isVal, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 16), instruction_pointer, "      [jump start, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 17), instruction_pointer, "      [jump start, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 
 //shr
     _asm_push_base("LOAD", architecture.get_op_2());
     _asm_push_base("ADD", architecture.get_op_2());
     _asm_push_base("STORE", architecture.get_op_2());
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 5), instruction_pointer, "      [jump init, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 6), instruction_pointer, "      [jump init, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //start
     _asm_push_base("LOAD", architecture.get_op_2(), "       [start, k = ");
     _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
     instruction_pointer++;
     _asm_push_base("STORE", architecture.get_op_2());
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 20), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 21), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //isValid
     _asm_push_base("LOAD", architecture.get_op_2(), "       [isValid, k = ");
     _asm_push_base("SUB", architecture.get_div_C());
-    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 27), instruction_pointer, "      [jpos valid, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 28), instruction_pointer, "      [jpos valid, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
     _asm_push_base("LOAD", architecture.get_div_C());
     _asm_push_base("SUB", architecture.get_op_2());
-    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 27), instruction_pointer, "      [jzero valid, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 28), instruction_pointer, "      [jzero valid, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 50), instruction_pointer, "      [jump end, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 51), instruction_pointer, "      [jump end, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //valid
     _asm_push_base("LOAD", architecture.get_op_1(), "       [valid, k = ");
     _asm_push_base("SUB", architecture.get_op_2());
-    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 31), instruction_pointer, "      [jpos kon, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 32), instruction_pointer, "      [jpos kon, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 42), instruction_pointer, "      [jzero sprawdzmy, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 43), instruction_pointer, "      [jzero sprawdzmy, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //kon
     _asm_push_base("STORE", architecture.get_div_R(), "     [kon, k = ");
@@ -246,33 +244,137 @@ void DirectedGraph::_asm_div(Value left, Value right, CodeBlock* codeblock) {
     _asm_push_base("ADD", architecture.get_div_Q());
     _asm_push_base("ADD", architecture.get_one());
     _asm_push_base("STORE", architecture.get_div_Q());
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 38), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 39), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //changeY
     _asm_push_base("LOAD", architecture.get_op_2(), "       [changeY, k = ");
     _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
     instruction_pointer++;
     _asm_push_base("STORE", architecture.get_op_2());
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 20), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 21), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //sprawdzmy
     _asm_push_base("LOAD", architecture.get_op_2(), "       [sprawdzmy, k = ");
     _asm_push_base("SUB", architecture.get_op_1());
-    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 31), instruction_pointer, "      [jzero kon, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 32), instruction_pointer, "      [jzero kon, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 46), instruction_pointer, "      [jump cant, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 47), instruction_pointer, "      [jump cant, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //cant
     _asm_push_base("LOAD", architecture.get_div_Q(), "      [cant, k = ");
     _asm_push_base("ADD", architecture.get_div_Q());
     _asm_push_base("STORE", architecture.get_div_Q());
-    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 38), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 39), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
     instruction_pointer++;
 //end
     _asm_push_base("LOAD", architecture.get_div_Q(), "      [end, k = ");
     
     
     
+}
+void DirectedGraph::_asm_mod(Value left, Value right, CodeBlock* codeblock) {
+    _asm_load(left, codeblock);
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_1(), instruction_pointer));
+    instruction_pointer++;
+    _asm_load(right, codeblock);
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_op_2(), instruction_pointer));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_div_C(), instruction_pointer));
+    instruction_pointer++;
+
+    int _zero = instruction_pointer;
+//pre  
+    _asm_instructions.push_back(AsmInstruction("SET", "0", instruction_pointer));
+    instruction_pointer++;
+    _asm_push_base("STORE", architecture.get_div_Q());
+    _asm_push_base("STORE", architecture.get_div_R()); //+1
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [pre, k = ");
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 52), instruction_pointer, "      [jpos enc, k = " + std::to_string(instruction_pointer) + "]"));//mod by 0
+    instruction_pointer++;
+    _asm_push_base("SUB", architecture.get_op_1());
+    
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 54), instruction_pointer, "      [jpos post end, k = " + std::to_string(instruction_pointer) + "]"));  //4%5
+    instruction_pointer++;
+    
+//init
+    _asm_push_base("LOAD", architecture.get_op_1(), "       [init, k = ");
+    _asm_push_base("SUB", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 14), instruction_pointer, "      [jpos shr, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;//
+    _asm_push_base("LOAD", architecture.get_op_2());
+    _asm_push_base("SUB", architecture.get_op_1());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 33), instruction_pointer, "      [jzero isVal, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 18), instruction_pointer, "      [jump start, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+
+//shr
+    _asm_push_base("LOAD", architecture.get_op_2());
+    _asm_push_base("ADD", architecture.get_op_2());
+    _asm_push_base("STORE", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 7), instruction_pointer, "      [jump init, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//start
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [start, k = ");
+    _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
+    instruction_pointer++;
+    _asm_push_base("STORE", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 22), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//isValid
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [isValid, k = ");
+    _asm_push_base("SUB", architecture.get_div_C());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 29), instruction_pointer, "      [jpos valid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_push_base("LOAD", architecture.get_div_C());
+    _asm_push_base("SUB", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 29), instruction_pointer, "      [jzero valid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 52), instruction_pointer, "      [jump end, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//valid
+    _asm_push_base("LOAD", architecture.get_op_1(), "       [valid, k = ");
+    _asm_push_base("SUB", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JPOS", std::to_string(_zero + 33), instruction_pointer, "      [jpos kon, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 44), instruction_pointer, "      [jzero sprawdzmy, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//kon
+    _asm_push_base("STORE", architecture.get_div_R(), "     [kon, k = ");
+    _asm_push_base("STORE", architecture.get_op_1());
+    _asm_push_base("LOAD", architecture.get_div_Q());
+    _asm_push_base("ADD", architecture.get_div_Q());
+    _asm_push_base("ADD", architecture.get_one());
+    _asm_push_base("STORE", architecture.get_div_Q());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 40), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//changeY
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [changeY, k = ");
+    _asm_instructions.push_back(AsmInstruction("HALF", instruction_pointer));
+    instruction_pointer++;
+    _asm_push_base("STORE", architecture.get_op_2());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 22), instruction_pointer, "      [jump isValid, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//sprawdzmy
+    _asm_push_base("LOAD", architecture.get_op_2(), "       [sprawdzmy, k = ");
+    _asm_push_base("SUB", architecture.get_op_1());
+    _asm_instructions.push_back(AsmInstruction("JZERO", std::to_string(_zero + 33), instruction_pointer, "      [jzero kon, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 48), instruction_pointer, "      [jump cant, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//cant
+    _asm_push_base("LOAD", architecture.get_div_Q(), "      [cant, k = ");
+    _asm_push_base("ADD", architecture.get_div_Q());
+    _asm_push_base("STORE", architecture.get_div_Q());
+    _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 40), instruction_pointer, "      [jump changeY, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//end
+    _asm_push_base("LOAD", architecture.get_div_R(), "      [end, k = ");
+     _asm_instructions.push_back(AsmInstruction("JUMP", std::to_string(_zero + 55), instruction_pointer, "      [jump next, k = " + std::to_string(instruction_pointer) + "]"));
+    instruction_pointer++;
+//post end
+    _asm_load(left, codeblock);
+//next
 }
 void DirectedGraph::_asm_add(Value val, CodeBlock* codeblock) {
     log.log("prosze o rejestr procedury: " + codeblock->proc_id + " dla zmiennej: " + val.load);
@@ -325,6 +427,19 @@ void DirectedGraph::_asm_cmp_eq(Value left, Value right, CodeBlock* codeblock) {
     _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_false, instruction_pointer));
     instruction_pointer++;
 }
+void DirectedGraph::_asm_cmp_neq(Value left, Value right, CodeBlock* codeblock) {
+    //true jesli left - right > 0 lub right - left > 0
+    _asm_load(right, codeblock);
+    _asm_sub(left, codeblock);
+    _asm_instructions.push_back(AsmInstruction("JPOS", codeblock->next_true, instruction_pointer));
+    instruction_pointer++;
+    _asm_load(left, codeblock);
+    _asm_sub(right, codeblock);
+    _asm_instructions.push_back(AsmInstruction("JPOS", codeblock->next_true, instruction_pointer));
+    instruction_pointer++;
+    _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_false, instruction_pointer));
+    instruction_pointer++;
+}
 void DirectedGraph::_asm_cmp_leq(Value left, Value right, CodeBlock* codeblock) {
     //true jesli left <= right tzn left - right = 0
     _asm_load(left, codeblock);
@@ -353,10 +468,13 @@ void DirectedGraph::translate_condition(Instruction ins, CodeBlock* codeblock) {
             _asm_cmp_eq(ins.left, ins.right, codeblock);
             break;
         case _LLEQ:
-            _asm_cmp_leq(ins.left, ins.right, codeblock);
+            _asm_cmp_leq(ins.right, ins.left, codeblock);
             break;
         case _LHEQ:
-            _asm_cmp_leq(ins.right, ins.left, codeblock);
+            _asm_cmp_leq(ins.left, ins.right, codeblock);
+            break;
+        case _NEQ:
+            _asm_cmp_neq(ins.left, ins.right, codeblock);
             break;
     }
 }
@@ -366,12 +484,22 @@ void DirectedGraph::translate_call(Instruction ins, CodeBlock* codeblock) {
     log.log("wewnatrz procedury: " + codeblock->proc_id + " tlumacze calla do procedury: " + proc_to_jump);
     for (int i = 0; i < ins.args.size(); i++) {
         //_asm_load(ins.args[i], codeblock);
-        std::string arg_address = std::to_string(architecture.get_register(ins.args[i].load, codeblock->proc_id)->id);
-        _asm_instructions.push_back(AsmInstruction("SET", arg_address, instruction_pointer));
-        instruction_pointer++;
+        std::string arg_address = std::to_string(architecture.get_register(ins.args[i].load, codeblock->proc_id)->id);  //numer rejestru pod ktorym jestidentyfikator taki sam jak w callu dla 
+        auto reg = architecture.get_register(ins.args[i].load, codeblock->proc_id);
         std::string id_want_to_store = architecture.procedures_memory[proc_to_jump].arg_ids[i];
+
+        if (codeblock->proc_id == "main") {
+            _asm_instructions.push_back(AsmInstruction("SET", arg_address, instruction_pointer));
+            instruction_pointer++;
+        } else if (architecture.is_an_arg(ins.args[i].load, codeblock->proc_id)) {
+            _asm_instructions.push_back(AsmInstruction("LOAD", reg, instruction_pointer));
+            instruction_pointer++;
+        } else {
+            _asm_instructions.push_back(AsmInstruction("SET", arg_address, instruction_pointer));
+            instruction_pointer++;
+        }
         _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_register(id_want_to_store, proc_to_jump), instruction_pointer));
-        instruction_pointer++;
+            instruction_pointer++;
         log.log("zapakowalem argument: " + id_want_to_store);
     }
     auto c = AsmInstruction("SET", std::to_string(instruction_pointer + 3), instruction_pointer);
@@ -403,8 +531,8 @@ void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
             log.log("translacja READ");
             _asm_get(ins.right, codeblock);
             if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                instruction_pointer++;
+                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                //instruction_pointer++;
             }
             break;
         case _WRITE:
@@ -412,23 +540,23 @@ void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
             _asm_put(ins.right, codeblock);
             log.log("done");
             if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                instruction_pointer++;
+                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                //instruction_pointer++;
             }
             break;
         case _ASS:
         log.log("tlumacze ass");
             translate_assign(ins, codeblock);
             if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                instruction_pointer++;
+                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                //instruction_pointer++;
             }
             break;
         case _CALL:
             translate_call(ins, codeblock);
             if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                instruction_pointer++;
+                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                //instruction_pointer++;
             }
             break;
         case _ENDWHILE:
@@ -589,6 +717,7 @@ void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
     if (codeblock == nullptr or codeblock->translated) {
         return;
     } else {
+        
         //std::cout <<"adres"<< codeblock << std::endl;;
         codeblock->ip = instruction_pointer;    //stad bede wiedzial gdzie skakac
         for (auto instruction : codeblock->meat) {
@@ -609,6 +738,11 @@ void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
             log.log("wracam");
             //return;
         } else {
+            if (codeblock->empty) {
+                codeblock->translated = false;
+                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                instruction_pointer++;
+            }
             log.log("after if");
             translate_snippet(codeblock->next_true);
             translate_snippet(codeblock->next_false);
@@ -670,4 +804,25 @@ void DirectedGraph:: resolve_jumps() {
         }
     }
     
+}
+
+void DirectedGraph::save_code(std::string out) {
+    output.open(out + ".mr");
+    for (auto asmins : _asm_instructions) {
+        if (asmins.jump_address == -1) {
+            if (asmins._register != nullptr) {
+                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins._register->id) + asmins.constant + asmins.label);
+                output <<  "   " + asmins.code + "        " + std::to_string(asmins.reg_id) + asmins.constant + asmins.label << std::endl;
+            } else {
+                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " +asmins.constant + asmins.label);
+                           output << "   " + asmins.code + "        " +asmins.constant + asmins.label << std::endl;;
+
+            }
+        } else {
+                //log.log(std::to_string(asmins.ip) + "   " + asmins.code + "        " + std::to_string(asmins.jump_address) + asmins.constant + asmins.label);
+                   output << "   " + asmins.code + "        " + std::to_string(asmins.jump_address) + asmins.constant + asmins.label << std::endl;
+
+        }
+    }
+    output.close();
 }

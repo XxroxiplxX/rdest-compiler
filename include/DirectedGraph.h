@@ -8,6 +8,7 @@
 #include <map>
 #include "CodeBlock.h"
 #include "Logger.h"
+#include "lexer_post.h"
 struct Vertexx {
     int id;
     std::vector<int> neighbours;
@@ -33,8 +34,8 @@ struct Register {
     Register(int _id, std::string arg) : id(_id), holds_argument(1), state(_UNLOCKED) {}
 };
 struct Memory {
-    std::map<std::string, Register*> variables;
-    std::vector<std::string> arg_ids;
+    std::map<std::string, Register*> variables; //identyfikatory wewnetrznych zmiennych iiii argumentow wewnatrz danej procedury
+    std::vector<std::string> arg_ids;   //identyfikatory znajdujace sie deklaracji argumentow procedury
     Register* ret_reg = nullptr;
 };
 struct Architecture {
@@ -119,6 +120,14 @@ struct Architecture {
     Register* get_op_2() {
         return op_2;
     }
+    bool is_an_arg(std::string ident, std::string proc_id) {
+        for (auto id : procedures_memory[proc_id].arg_ids) {
+            if (id == ident) {
+                return true;
+            }
+        }
+        return false;
+    }
     void assert_var(std::string id, std::string proc_id) {
         //variables.insert({id, Register(var_p)});
         procedures_memory[proc_id].variables[id] = new Register(var_p);
@@ -194,7 +203,7 @@ class DirectedGraph {
     public:
     Logging::Logger log = Logging::Logger("translation.log");
     Architecture architecture;
-
+    std::ofstream output;
     int end_blocks = 1000;
     std::vector<CodeBlock> vertices;
 
@@ -234,6 +243,7 @@ class DirectedGraph {
     void _asm_cmp_lower(Value left, Value right, CodeBlock* codeblock);
     void _asm_cmp_eq(Value left, Value right, CodeBlock* codeblock);
     void _asm_cmp_leq(Value left, Value right, CodeBlock* codeblock);
+    void _asm_cmp_neq(Value left, Value right, CodeBlock* codeblock);
     void _asm_load(Value val, CodeBlock* codeblock);
     void _asm_store(Value val, CodeBlock* codeblock);
     void _asm_get(Value val, CodeBlock* codeblock);
@@ -247,6 +257,7 @@ class DirectedGraph {
     void _asm_jump_i(std::string proc_id);
     void _asm_clean_op_regs();
     void _return();
+    void save_code(std::string out);
 };
 
 #endif //COMPILER_DIRECTEDGRAPH_H

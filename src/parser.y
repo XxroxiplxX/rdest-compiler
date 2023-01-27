@@ -19,8 +19,10 @@ auto control_flow_graph = GraphLib::Graph<int, int>();
 auto t = DirectedGraph();
 std::vector<Vertexx> vertic;
 std::vector<std::string> procs;
+extern "C" FILE *yyin;
 int id = 0;
 bool head_sig = 1;
+int curr_line = 0;
 
 %}
 
@@ -71,7 +73,7 @@ bool head_sig = 1;
 %token LBR
 %token RBR
 
-
+%token PARSE_ERROR
 
 %%
 
@@ -419,7 +421,7 @@ command:
             id++;
     }
     | WHILE condition DO commands ENDWHILE  {
-        
+        curr_line+=2;
         //logger.log("zredukowano WHILE");
         std::string msg = "dodano krawedz miedzy vertexami: ";
         msg += std::to_string(providers[stoi($2)]._begin_id);
@@ -445,6 +447,7 @@ command:
 
     }
     | REPEAT commands UNTIL condition SEMICOLON {
+        curr_line +=2;
         EdgeProvider provider;  //provider for
         logger.log("1");
         t.add_edge(providers[stoi($2)]._end_id, providers[stoi($4)]._begin_id);   //\
@@ -491,7 +494,7 @@ command:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
-        
+        curr_line++;
         }
     | WRITE value SEMICOLON {
 
@@ -524,6 +527,7 @@ command:
         logger.log("handled WRITE with identaificator " + instruction.right + " and \
         ___id = " +"__");
         $$ = id;*/
+        curr_line++;
         }
 ;
 proc_head:
@@ -760,6 +764,7 @@ condition:
         $$=std::to_string(id);
         id++;
         logger.log("done");
+        curr_line++;
     }
     |value NEQ value {
         if (head_sig) {
@@ -788,6 +793,7 @@ condition:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
+        curr_line++;
     }
     |value LMORE value {
         if (head_sig) {
@@ -816,6 +822,7 @@ condition:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
+        curr_line++;
     }
     |value LLESS value {
         if (head_sig) {
@@ -844,6 +851,7 @@ condition:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
+        curr_line++;
     }
     |value LHEQ value {
         if (head_sig) {
@@ -872,6 +880,7 @@ condition:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
+        curr_line++;
     }
     |value LLEQ value {
         if (head_sig) {
@@ -899,6 +908,7 @@ condition:
         providers.push_back(provider);
         $$=std::to_string(id);
         id++;
+        curr_line++;
     }
 ;
 value:
@@ -925,13 +935,17 @@ value:
         
         
     }
+    
 ;
 %%
 void yyerror(const char* msg) {
-
+    std::cerr << "blad w linii: " <<  std::endl;
+    exit(1);
+    
 }
-int handle()
+int handle(const char* input_file)
 {
+    yyin = fopen(input_file, "r" );
     int parsed = yyparse();
     for (auto it : t.head_map) {
         std::cout << it.first << "-->" << it.second << std::endl;
@@ -942,6 +956,9 @@ int handle()
     t.transform();
     t.translate_main();
     t.save_to_csv("/tmp/graphs");
+    auto out = std::string(input_file);
+    out.erase(out.length() - 4, 4);
+    t.save_code(out);
     //control_flow_graph.save_to_csv("/tmp/graphs");
     printf("to ja\n");
     
@@ -963,9 +980,10 @@ std::string clean_NUM(std::string NUM) {
     }
     return load;
 }
-int main()
-{
+int main(int argc, const char** argv) {
 
-    return handle();
+    
+
+    return handle(argv[1]);
     
 }
