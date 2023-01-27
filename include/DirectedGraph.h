@@ -1,7 +1,9 @@
 #ifndef COMPILER_DIRECTEDGRAPH_H
 #define COMPILER_DIRECTEDGRAPH_H
 
-
+#include <sstream>
+#include <stdlib.h>
+#include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>

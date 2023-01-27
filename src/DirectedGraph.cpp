@@ -87,10 +87,42 @@ void DirectedGraph::_asm_set_op_constants() {
 }
 void DirectedGraph::_asm_set_external_constants() {
     for (auto const_reg : architecture.constants) {
-        _asm_instructions.push_back(AsmInstruction("SET", const_reg.first, instruction_pointer));
-        instruction_pointer++;
-        _asm_instructions.push_back(AsmInstruction("STORE", const_reg.second, instruction_pointer));
-        instruction_pointer++;
+        std::string constant = const_reg.first;
+        if (constant.length() > 18) {
+            std::cout << "biiig\n";
+            __uint128_t magnitude = 1;
+            __uint128_t biig = 0;
+            char cyphers [1];
+            for (int i = constant.length() - 1; i >= 0; i--) {
+                cyphers[0] = constant[i];
+                int a = atoi(cyphers);
+                std::cout << "daleko\n";
+                biig += a*magnitude;
+                magnitude *= 10;
+            }
+            std::vector<std::string> quite_small_constants;
+            long long small = 9223372036854775807;
+            while (biig > small) {
+                biig -= small;
+                quite_small_constants.push_back(std::to_string(small));
+            }
+            small = biig;
+            quite_small_constants.push_back(std::to_string(small));
+            for (auto set : quite_small_constants) {
+                _asm_instructions.push_back(AsmInstruction("SET", set, instruction_pointer));
+                instruction_pointer++;
+                _asm_instructions.push_back(AsmInstruction("ADD", const_reg.second, instruction_pointer));
+                instruction_pointer++;  
+                _asm_instructions.push_back(AsmInstruction("STORE", const_reg.second, instruction_pointer));
+                instruction_pointer++;
+            }
+            
+        } else {
+            _asm_instructions.push_back(AsmInstruction("SET", const_reg.first, instruction_pointer));
+            instruction_pointer++;
+            _asm_instructions.push_back(AsmInstruction("STORE", const_reg.second, instruction_pointer));
+            instruction_pointer++;
+        }
     }
 }
 void DirectedGraph::_asm_mul(Value left, Value right, CodeBlock* codeblock) {
