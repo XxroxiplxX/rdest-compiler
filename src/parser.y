@@ -412,8 +412,8 @@ command:
             t.add_edge(providers[stoi($2)]._begin_id, providers[stoi($4)]._begin_id, true);   //condidtion->commands
             t.add_edge(providers[stoi($2)]._begin_id, id, false);    //condition->endif
             t.add_edge(providers[stoi($4)]._end_id, id);  //end of command->endif
-            provider._begin_id = providers[stoi($4)]._begin_id;
-            provider._end_id = id;;    //koniec ifa to endif
+            provider._begin_id = providers[stoi($2)]._begin_id;
+            provider._end_id = id;   //koniec ifa to endif
             
             
             providers.push_back(provider);

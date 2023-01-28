@@ -562,33 +562,33 @@ void DirectedGraph::translate_ins(Instruction ins, CodeBlock* codeblock) {
         case _READ:
             log.log("translacja READ");
             _asm_get(ins.right, codeblock);
-            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                //instruction_pointer++;
+            if (codeblock->next_true != nullptr and  !codeblock->next_true->empty and codeblock->next_true->meat[0]._while_cond) {
+                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                instruction_pointer++;
             }
             break;
         case _WRITE:
         log.log("translacja WRITE");
             _asm_put(ins.right, codeblock);
             log.log("done");
-            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                //instruction_pointer++;
+            if (codeblock->next_true != nullptr and !codeblock->next_true->empty and codeblock->next_true->meat[0]._while_cond) {
+                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                instruction_pointer++;
             }
             break;
         case _ASS:
         log.log("tlumacze ass");
             translate_assign(ins, codeblock);
-            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                //instruction_pointer++;
+            if (codeblock->next_true != nullptr and !codeblock->next_true->empty and codeblock->next_true->meat[0]._while_cond) {
+                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                instruction_pointer++;
             }
             break;
         case _CALL:
             translate_call(ins, codeblock);
-            if (codeblock->next_true != nullptr and (codeblock->next_true->empty or codeblock->next_true->meat[0]._while_cond)) {
-                //_asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
-                //instruction_pointer++;
+            if (codeblock->next_true != nullptr and !codeblock->next_true->empty and codeblock->next_true->meat[0]._while_cond) {
+                _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
+                instruction_pointer++;
             }
             break;
         case _ENDWHILE:
@@ -727,15 +727,18 @@ void DirectedGraph::save_to_csv(std::string path) {
             
         }*/
         for (int i = 0; i < vertices.size(); i++) {
-            //for (int j = 0; j < vertices[i].neighbours.size(); j++) {
-              //  outdata_e << vertices[i].id << ";" << vertices[i].neighbours[j] << std::endl;
-                //std::cout << vertices[i].id << ";" << vertices[i].neighbours[j] << std::endl;
-            //}
+           /*
             if (vertices[i].next_true != nullptr) {
                 outdata_e << vertices[i].id << ";" << vertices[i].next_true->id <<std::endl;
             }
             if (vertices[i].next_false != nullptr) {
                 outdata_e << vertices[i].id << ";" << vertices[i].next_false->id <<std::endl;
+            }*/
+            if (vertices[i].next_true_id != -1) {
+                outdata_e << vertices[i].id << ";" << vertices[i].next_true_id <<std::endl;
+            }
+            if (vertices[i].next_false_id != -1) {
+                outdata_e << vertices[i].id << ";" << vertices[i].next_false_id <<std::endl;
             }
             
         }
@@ -774,6 +777,7 @@ void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
                 codeblock->translated = false;
                 _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
                 instruction_pointer++;
+                log.log("moj next to: " + std::to_string(codeblock->next_true->meat[0].type_of_instruction));
             }
             log.log("after if");
             translate_snippet(codeblock->next_true);
