@@ -1,7 +1,9 @@
 #include "../include/DirectedGraph.h"
 //#include "DirectedGraph.h"
 void DirectedGraph::_asm_get(Value val, CodeBlock* codeblock) {
-    _asm_instructions.push_back(AsmInstruction("GET", architecture.get_register(val.load, codeblock->proc_id), instruction_pointer));
+    auto pt = architecture.get_register(val.load, codeblock->proc_id);
+    pt->is_init = true;
+    _asm_instructions.push_back(AsmInstruction("GET", pt, instruction_pointer));
     instruction_pointer++;
     
 }
@@ -43,6 +45,7 @@ void DirectedGraph::_asm_store(Value val, CodeBlock* codeblock) {
         } else {
             _asm_instructions.push_back(AsmInstruction("STORE", val_reg, instruction_pointer));
         }
+        val_reg->is_init = true;
     } else {    //case const
         _asm_instructions.push_back(AsmInstruction("STORE", architecture.get_constant(val.load), instruction_pointer));
     }
@@ -89,14 +92,14 @@ void DirectedGraph::_asm_set_external_constants() {
     for (auto const_reg : architecture.constants) {
         std::string constant = const_reg.first;
         if (constant.length() > 18) {
-            std::cout << "biiig\n";
+            //std::cout << "biiig\n";
             __uint128_t magnitude = 1;
             __uint128_t biig = 0;
             char cyphers [1];
             for (int i = constant.length() - 1; i >= 0; i--) {
                 cyphers[0] = constant[i];
                 int a = atoi(cyphers);
-                std::cout << "daleko\n";
+                //std::cout << "daleko\n";
                 biig += a*magnitude;
                 magnitude *= 10;
             }
@@ -611,7 +614,7 @@ void DirectedGraph::add_vertexx(int v_id) {
 
 CodeBlock* DirectedGraph::get_vertexx(int v_id) {
     if (v_id == 5) {
-        std::cout << "handled\n";
+        //std::cout << "handled\n";
     }
     if (v_id == -1) {
         log.log("aha");
@@ -640,7 +643,7 @@ void DirectedGraph::add_edge(int v_id, int u_id, bool flag) {
             get_vertexx(v_id)->next_true_id = u_id;
         } else {
             get_vertexx(v_id)->next_false_id = u_id;
-            std::cout << "dodalem" << u_id << std::endl;
+            //std::cout << "dodalem" << u_id << std::endl;
         }
         
     } catch (const char* msg) {
@@ -688,7 +691,7 @@ void DirectedGraph::populate_neighbours(CodeBlock* codeblock, std::string proc_i
 void DirectedGraph::transform() {
     CodeBlock* tmp;
     for (auto v : vertices) {
-        std:: cout << v.next_false_id << "   ";
+        //std:: cout << v.next_false_id << "   ";
     }
     //std::cout << get_vertexx(5)->id << "  ###\n";
     
@@ -705,10 +708,10 @@ void DirectedGraph::transform() {
         populate_neighbours(tmp, head.second);
     }
     for (auto v : vertices) {
-        std :: cout << v.id << "        " << v.proc_id << std::endl;
+        //std :: cout << v.id << "        " << v.proc_id << std::endl;
     }
-    std::cout << "skonczylem transformacje\n";
-    save_to_csv("/tmp/graphs");
+    //std::cout << "skonczylem transformacje\n";
+    //save_to_csv("/tmp/graphs");
 }
 
 void DirectedGraph::save_to_csv(std::string path) {
@@ -777,7 +780,7 @@ void DirectedGraph::translate_snippet(CodeBlock* codeblock) {
                 codeblock->translated = false;
                 _asm_instructions.push_back(AsmInstruction("JUMP", codeblock->next_true, instruction_pointer));
                 instruction_pointer++;
-                log.log("moj next to: " + std::to_string(codeblock->next_true->meat[0].type_of_instruction));
+                //log.log("moj next to: " + std::to_string(codeblock->next_true->meat[0].type_of_instruction));
             }
             log.log("after if");
             translate_snippet(codeblock->next_true);
@@ -799,7 +802,7 @@ void DirectedGraph::translate_main() {
     for (auto it : head_map) {
         if (it.second == "main") {
             auto head = get_vertexx(it.first);
-            std::cout << "numerek " << it.first << std::endl;
+            //std::cout << "numerek " << it.first << std::endl;
             _asm_instructions.push_back(AsmInstruction("JUMP", head, instruction_pointer));
             instruction_pointer++;
         }
@@ -843,7 +846,7 @@ void DirectedGraph:: resolve_jumps() {
 }
 
 void DirectedGraph::save_code(std::string out) {
-    output.open(out + ".mr");
+    output.open(out);
     for (auto asmins : _asm_instructions) {
         if (asmins.jump_address == -1) {
             if (asmins._register != nullptr) {

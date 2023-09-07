@@ -4,12 +4,13 @@ clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -f $(OBJ) $(EXEC)
 	rm -f ../src/parsery.hpp	../src/parsery.cpp ../src/analyzer.cpp
+	rm -f ../build/*.imp ../build/*.mr
 
 SRC_DIR=../src
 INC_DIR=../include
 
 
-EXEC := rdest
+EXEC := kompilator
 SRC := $(wildcard $(SRC_DIR)/*.cpp)
 INC := $(wildcard $(INC_DIR)/*.h)
 OBJ := $(SRC:%.cpp=%.o)
@@ -23,7 +24,7 @@ analyzer.cpp:
 	flex -o ../src/analyzer.cpp ../src/lexer.l
 # COMPILING
 %.o: %.cpp $(INC)
-	g++ -pedantic $(HEADERS) -c $< -o $@ -l cln
+	g++ -std=c++17 -pedantic $(HEADERS) -c $< -o $@
 
 $(EXEC): $(SRC) $(INC) $(OBJ)
 	$(CXX) $(HEADERS) $(OBJ) -o $@

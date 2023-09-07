@@ -5,7 +5,7 @@
 #include "CodeBlock.h"
 #include <vector>
 #include "EdgeProvider.h"
-#include <Graph.h>
+
 #include "DirectedGraph.h"
 #include <string.h>
 
@@ -15,9 +15,8 @@ std::string clean_ID(std::string ID);
 std::string clean_NUM(std::string NUM);
 void yyerror(const char *s);
 auto logger = Logging::Logger("logs.log");
-auto control_flow_graph = GraphLib::Graph<int, int>();
 auto t = DirectedGraph();
-std::vector<Vertexx> vertic;
+
 std::vector<std::string> procs;
 extern "C" FILE *yyin;
 int id = 0;
@@ -112,6 +111,19 @@ procedures:
             }
         }
         tmp_args.push_back(clean_ID(tmp_id));
+        int presence = 0;
+        for (auto arg : tmp_args) {
+            for (auto inarg : tmp_args) {
+                if (inarg == arg) {
+                    presence++;
+                }
+            }
+            if (presence > 1) {
+                std::cerr << "powtorzenie argumentu w procedurze: " << proc_id << std::endl;
+                exit(1);
+            }
+            presence = 0;
+        }
         no_of_args++;
         proc_id += std::to_string(no_of_args);
         for (auto it : tmp_args) {
@@ -125,11 +137,13 @@ procedures:
         lt--;
         int last = lt->first;
         t.head_map[last] = proc_id;
+        std::vector<std::string> tmp_vars;
         /*handle proc declarations*/
         std::string tmp_decl = "";
         for (int i = 0; i < ($6).length(); i++) {
             if ($6[i] == ',') {
                 t.architecture.assert_var(clean_ID(tmp_decl), proc_id);
+                tmp_vars.push_back(clean_ID(tmp_decl));
                 logger.log("database updated: " + tmp_decl + "-->" + proc_id);
                 tmp_decl = "";
             } else {
@@ -143,6 +157,32 @@ procedures:
         t.add_edge(providers[stoi($8)]._end_id, id);
         id++;*/
         t.architecture.assert_var(clean_ID(tmp_decl), proc_id);
+        tmp_vars.push_back(clean_ID(tmp_decl));
+        presence = 0;
+        for (auto var : tmp_vars) {
+            for (auto arg : tmp_args) {
+                if (var == arg) {
+                    presence++;
+                }
+            }
+            if (presence == 1) {
+                std::cerr << "blad, tozsama nazwa argumentu i zmiennej w procedurze: " << proc_id << std::endl;
+                exit(1);
+            }
+            presence = 0;
+        }
+        for (auto var : tmp_vars) {
+            for (auto inner_var : tmp_vars) {
+                if (var == inner_var) {
+                    presence++;
+                }
+            }
+            if (presence > 1) {
+                std::cerr << "blad, powtorzenie deklaracji zmiennej w procedurze: " << proc_id << std::endl;
+                exit(1);
+            }
+            presence = 0;
+        }
         t.architecture.assert_var(proc_id, proc_id);    //adres powrotu
         logger.log("database updated: " + tmp_decl + "-->" + proc_id);
         logger.log("###definicja: " + proc_id);
@@ -204,19 +244,21 @@ procedures:
         //id++;
         
     }
-    | %empty {printf("no procedures\n");}
+    | %empty {}
 ;
 main:
     PROGRAM IS VAR declarations BEGI commands END {
-        printf("main detected\n");
+        //printf("main detected\n");
         auto lt = t.head_map.end();
         lt--;
         int last = lt->first;
         t.head_map[last] = "main";
         std::string tmp_decl = "";
+        std::vector<std::string> tmp_decls;
         for (int i = 0; i < ($4).length(); i++) {
             if ($4[i] == ',') {
                 t.architecture.assert_var(clean_ID(tmp_decl), "main");
+                 tmp_decls.push_back(clean_ID(tmp_decl));
                 logger.log("database updated: " + tmp_decl + "-->" + "main");
                 tmp_decl = "";
             } else {
@@ -229,6 +271,20 @@ main:
         //t.vertices[t.vertices.size() - 1].meat.push_back(instruction);
         //t.add_edge(providers[stoi($6)]._end_id, id);
         //id++;
+        int presence = 0;
+        tmp_decls.push_back(clean_ID(tmp_decl));
+        for (auto var : tmp_decls) {
+            for (auto inner_var : tmp_decls) {
+                if (var == inner_var) {
+                    presence++;
+                }
+            }
+            if (presence > 1) {
+                std::cerr << "blad, powtorzenie deklaracji zmiennej w procedurze: " << "main" << std::endl;
+                exit(1);
+            }
+            presence = 0;
+        }
         t.architecture.assert_var(clean_ID(tmp_decl), "main");
         logger.log("database updated: " + tmp_decl + "-->" + "main");
 
@@ -269,7 +325,7 @@ commands:
         msg += " -> ";
         msg += std::to_string(providers[stoi($2)].get_begin_id());
         if (providers[stoi($1)].get_end_id() == 0) {
-            printf("AAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+            //printf("AAAAAAAAAAAAAAAAAAAAAAAAAA\n");
         }
         logger.log(msg);
         t.add_edge(providers[stoi($1)]._end_id, providers[stoi($2)]._begin_id);
@@ -348,6 +404,8 @@ command:
         }
         if (!c) {
             logger.log("na liscie nie znaleziono procedury: " + name);
+            std::cerr << "uzycie niezdefiniowanej procedury" << std::endl;
+            exit(1);
         }
         //logger.log("na liscie nie znaleziono procedury: " + name);
         //blad procedura nie zdefiniowana
@@ -361,7 +419,7 @@ command:
         //logger.log("dodano vertex pod assign z id: ", id);
         if (head_sig) {
             //t.head_ids.push_back(id);
-            printf("glowaaaa\n");
+            //printf("glowaaaa\n");
             logger.log("&&&code----------block glowa z id:",id);
         }
         head_sig = 0;
@@ -943,24 +1001,24 @@ void yyerror(const char* msg) {
     exit(1);
     
 }
-int handle(const char* input_file)
+int handle(const char* input_file, const char* output_file)
 {
     yyin = fopen(input_file, "r" );
     int parsed = yyparse();
     for (auto it : t.head_map) {
-        std::cout << it.first << "-->" << it.second << std::endl;
+        //std::cout << it.first << "-->" << it.second << std::endl;
     }
 
     logger.log("test");
     logger.close_logger();
     t.transform();
     t.translate_main();
-    t.save_to_csv("/tmp/graphs");
-    auto out = std::string(input_file);
-    out.erase(out.length() - 4, 4);
+    //t.save_to_csv("/tmp/graphs");
+    auto out = std::string(output_file);
+    //out.erase(out.length() - 4, 4);
     t.save_code(out);
     //control_flow_graph.save_to_csv("/tmp/graphs");
-    printf("to ja\n");
+    //("to ja\n");
     
     //auto x = control_flow_graph.get_edge(0,1)->label;
     //printf("%d\n", control_flow_graph.get_edge(0,1)->label);
@@ -984,6 +1042,6 @@ int main(int argc, const char** argv) {
 
     
 
-    return handle(argv[1]);
+    return handle(argv[1], argv[2]);
     
 }

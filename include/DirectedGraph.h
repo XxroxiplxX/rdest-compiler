@@ -10,7 +10,7 @@
 #include <map>
 #include "CodeBlock.h"
 #include "Logger.h"
-#include "lexer_post.h"
+
 struct Vertexx {
     int id;
     std::vector<int> neighbours;
@@ -24,6 +24,8 @@ enum State {
 struct Register {
     int id;
     State state;
+    int usage = 0;
+    bool is_init = 0;
     std::string range;
     bool holds_argument = 0;
     void lock() {
@@ -170,12 +172,22 @@ struct Architecture {
         return tmp_ptr;
     }
     Register* get_register(std::string iden, std::string proc_id) {
+        
        // if (variables[iden]->state == State::_UNLOCKED) {
           //  return variables[iden];
        // } else {
             //return nullptr;
        // }
         auto tmp_ptr = procedures_memory[proc_id].variables[iden];
+        if (tmp_ptr == nullptr) {
+            std::cerr << "blad, niezadeklarowana zmienna" << std::endl;
+            exit(1);
+        }
+        if (!tmp_ptr->is_init and tmp_ptr->usage > 0) {
+            //std::cout << "blad, niezainicjalizowana zmienna" << tmp_ptr->id <<  std::endl;
+            //exit(1);
+        }
+        tmp_ptr->usage++;
         log.log("pamiec przekazala rejestr: @" + std::to_string(tmp_ptr->id) + " dla procedury : @" + proc_id + " i zmiennej: @" + iden);
         return tmp_ptr;
     }

@@ -16,18 +16,19 @@ namespace Logging {
         public:
             void log(CodeBlock cb);
             Logger(std:: string filename) : file_name(filename) {
-                output.open(file_name);
+                //output.open(file_name);
             }
+            Logger(){}
             void log(std::string msg);
             void log(std::string msg, int param);
             ~Logger() {
-                output.close();
+                //output.close();
             }
             void close_logger() {
                 for (auto it : log_list) {
                     std::cout << it << std::endl;
                 }
-                output.close();
+                //output.close();
             }
     };
 }

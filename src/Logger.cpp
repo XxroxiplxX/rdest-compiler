@@ -3,13 +3,13 @@ namespace Logging {
 
     void Logger::log(std::string msg) {
         //log_list.push_back(msg);
-        output << msg << std::endl;
+        //output << msg << std::endl;
         //std::cout << "                                  dzialam" << std::endl;
     }
     void Logger::log(std::string msg, int param) {
-        output << msg << param << std::endl;
+        //output << msg << param << std::endl;
     }
-    void Logger::log(CodeBlock cb) {
+    void Logger::log(CodeBlock cb) {/*
         output << "************************************\n";
         output << "********#codeblock id : " << cb.id << std::endl;
         output << "--------next_true: " << cb.next_true_id << std::endl;
@@ -32,6 +32,6 @@ namespace Logging {
             }
             output << "\n";
         }
-        output << "************************************\n";
+        output << "************************************\n";*/
     }
 }
