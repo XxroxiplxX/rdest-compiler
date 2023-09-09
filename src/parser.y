@@ -425,7 +425,7 @@ command:
         head_sig = 0;
         t.get_vertexx(providers[stoi($3)]._begin_id)->meat[0].left = Value($1);
         t.get_vertexx(providers[stoi($3)]._begin_id)->meat[0].type_of_instruction = _type_of_meat::_ASS;
-        logger.log(*t.get_vertexx(providers[stoi($3)]._begin_id));
+        //logger.log(*t.get_vertexx(providers[stoi($3)]._begin_id));
         //logger.log("______" + t.get_vertexx(providers[$3]._begin_id)->meat[0].left + "_______");
         //logger.log("_________" + t.get_vertexx(providers[$3]._begin_id)->meat[0].expr.left + 
         //std::to_string(t.get_vertexx(providers[$3]._begin_id)->meat[0].expr.type_of_operator) +
@@ -572,7 +572,7 @@ command:
         provider.set_begin_id(id);
         provider.set_end_id(id);
         providers.push_back(provider);
-        logger.log(*t.get_vertexx(id));
+        //logger.log(*t.get_vertexx(id));
         $$=std::to_string(id);
         id++;
         /*int id = graph.size();
@@ -1010,7 +1010,7 @@ int handle(const char* input_file, const char* output_file)
     }
 
     logger.log("test");
-    logger.close_logger();
+    //logger.close_logger();
     t.transform();
     t.translate_main();
     //t.save_to_csv("/tmp/graphs");

@@ -1,14 +1,12 @@
-#ifndef COMPILER_CODDEBLOCK_H
-#define COMPILER_CODDEBLOCK_H
+#ifndef COMPILER_CODEBLOCK_H
+#define COMPILER_CODEBLOCK_H
 
 
 #include <vector>
 #include<string>
 #include <map>
-enum type_of_value {
-    _NUM = 1,
-    _ID = 2
-};
+
+/*
 struct Value {
     type_of_value type;
     std::string load="";
@@ -37,7 +35,7 @@ struct Value {
             }
         }
     }
-};
+};*/
 enum _type_of_meat {
     _COND = 1,
     _READ = 2,
@@ -79,13 +77,7 @@ struct Instruction {
     Expression expr;
     std::vector<Value> args;
     std::string proc_id;
-    std::string to_asm() {
-        //switch (type_of_instruction) {
-          //  case _type_of_meat::_ASS:
-                //aaaa
-            return "";
-        //}
-    }
+    
 };
 
 class CodeBlock {
@@ -123,4 +115,4 @@ class CodeBlock {
 
 };
 
-#endif //COMPILER_CODDEBLOCK_H
+#endif //COMPILER_CODEBLOCK_H
