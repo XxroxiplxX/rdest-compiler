@@ -2,6 +2,9 @@
 #include <memory>
 
 namespace Blocks {
+CodeBlock::CodeBlock()
+    : is_empty(false), is_last(false), ip(-1), id(-1), is_visited(false),
+      is_translated(false) {}
 bool CodeBlock::is_codeblock_empty() const { return is_empty; }
 bool CodeBlock::is_codeblock_last() const { return is_last; }
 bool CodeBlock::is_codeblock_visited() const { return is_visited; }
@@ -78,5 +81,8 @@ CodeBlockBuilder &CodeBlockBuilder::build_new_added_instruction(
     std::shared_ptr<Instruction> &instruction) {
   codeblock->push_new_instruction(instruction);
   return *this;
+}
+std::shared_ptr<CodeBlock>& CodeBlockBuilder::return_builded_obj() {
+  return codeblock;
 }
 } // namespace Blocks

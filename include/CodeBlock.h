@@ -18,6 +18,7 @@ class CodeBlock {
   std::vector<std::shared_ptr<Instruction>> meat;
 
 public:
+  CodeBlock();
   bool is_codeblock_empty() const;
   bool is_codeblock_last() const;
   bool is_codeblock_visited() const;
@@ -55,6 +56,7 @@ public:
   CodeBlockBuilder &build_next_false_codeblock(std::shared_ptr<CodeBlock> &);
   CodeBlockBuilder &
   build_new_added_instruction(std::shared_ptr<Instruction> &instruction);
+  std::shared_ptr<CodeBlock>& return_builded_obj();
 };
 } // namespace Blocks
 
