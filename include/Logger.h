@@ -12,8 +12,9 @@
 namespace Logging {
 class Logger {
 public:
+  Logger() = default;
   Logger(const std::string &filename) {
-    file_.open(filename, std::ios::out | std::ios::app);
+    file_.open(filename, std::ios::out );
   }
 
   ~Logger() {
@@ -62,7 +63,7 @@ private:
 
     tm *ltm = localtime(&now);
     oss << "<" << 1900 + ltm->tm_year << "-" << 1 + ltm->tm_mon << "-"
-        << ltm->tm_mday << " T " << ltm->tm_hour << ":" << ltm->tm_min << ":"
+        << ltm->tm_mday << "T" << ltm->tm_hour << ":" << ltm->tm_min << ":"
         << ltm->tm_sec;
   }
   template <typename Arg>
