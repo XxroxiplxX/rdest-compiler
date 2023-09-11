@@ -1,6 +1,5 @@
 #ifndef COMPILER_VALUETYPES_VALUE
 #define COMPILER_VALUETYPES_VALUE
-
 #include <string>
 namespace ValueTypes {
 enum type_of_value { _NUM = 1, _ID = 2 };
