@@ -3,6 +3,7 @@
 
 #include "Block.h"
 #include <memory>
+#include <vector>
 
 namespace Blocks {
 class CodeBlock {
@@ -14,6 +15,7 @@ class CodeBlock {
   bool is_translated;
   std::shared_ptr<CodeBlock> next_true;
   std::shared_ptr<CodeBlock> next_false;
+  std::vector<std::shared_ptr<Instruction>> meat;
 
 public:
   bool is_codeblock_empty() const;
@@ -24,6 +26,7 @@ public:
   int get_codeblock_id() const;
   std::shared_ptr<CodeBlock> get_next_true_codeblock() const;
   std::shared_ptr<CodeBlock> get_next_false_codeblock() const;
+  std::vector<std::shared_ptr<Instruction>> &get_all_instructions();
 
   void set_codeblock_empty();
   void set_codeblock_last();
@@ -33,6 +36,7 @@ public:
   void set_codeblock_id(int _id);
   void set_next_true_codeblock(std::shared_ptr<CodeBlock>);
   void set_next_false_codeblock(std::shared_ptr<CodeBlock>);
+  void push_new_instruction(std::shared_ptr<Instruction> instruction);
 };
 } // namespace Blocks
 

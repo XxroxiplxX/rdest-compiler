@@ -13,6 +13,9 @@ std::shared_ptr<CodeBlock> CodeBlock::get_next_true_codeblock() const {
 std::shared_ptr<CodeBlock> CodeBlock::get_next_false_codeblock() const {
   return next_false;
 }
+std::vector<std::shared_ptr<Instruction>> &CodeBlock::get_all_instructions() {
+  return meat;
+}
 
 void CodeBlock::set_codeblock_empty() { is_empty = true; }
 void CodeBlock::set_codeblock_last() { is_last = true; }
@@ -25,5 +28,8 @@ void CodeBlock::set_next_true_codeblock(std::shared_ptr<CodeBlock> nt) {
 }
 void CodeBlock::set_next_false_codeblock(std::shared_ptr<CodeBlock> nf) {
   next_false = nf;
+}
+void CodeBlock::push_new_instruction(std::shared_ptr<Instruction> instruction) {
+  meat.push_back(instruction);
 }
 } // namespace Blocks
