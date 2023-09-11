@@ -39,7 +39,7 @@ void Instruction::set_expression(Expression &expression) {
 std::vector<std::shared_ptr<Value>> Instruction::get_args_vector() const {
   return args;
 }
-void Instruction::push_arg(std::shared_ptr<Value> val) {
+void Instruction::push_arg(std::shared_ptr<Value>& val) {
   args.push_back(val);
 }
 void Instruction::set_proc_id(std::string id) {
@@ -68,7 +68,7 @@ ExpressionBuilder &ExpressionBuilder::build_operator(_type_of_operator _operator
   expression->set_operator(_operator);
     return *this;
 }
-std::shared_ptr<Expression> ExpressionBuilder::return_builded_obj() const {
+std::shared_ptr<Expression>& ExpressionBuilder::return_builded_obj() {
   return expression;
 }
 
@@ -99,7 +99,7 @@ InstructionBuilder &InstructionBuilder::build_expression(Expression& e) {
   instruction->set_expression(e);
     return *this;
 }
-InstructionBuilder &InstructionBuilder::build_args_vector(std::shared_ptr<Value> arg) {
+InstructionBuilder &InstructionBuilder::build_args_vector(std::shared_ptr<Value>& arg) {
   instruction->push_arg(arg);
     return *this;
 }
@@ -107,7 +107,7 @@ InstructionBuilder &InstructionBuilder::build_proc_id(std::string id) {
   instruction->set_proc_id(id);
     return *this;
 }
-std::shared_ptr<Instruction> InstructionBuilder::return_builded_obj() const {
+std::shared_ptr<Instruction>& InstructionBuilder::return_builded_obj() {
   return instruction;
 }
 

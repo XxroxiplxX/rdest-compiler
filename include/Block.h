@@ -71,7 +71,7 @@ public:
   Expression &get_expression();
   void set_expression(Expression &expression);
   std::vector<std::shared_ptr<Value>> get_args_vector() const;
-  void push_arg(std::shared_ptr<Value> val);
+  void push_arg(std::shared_ptr<Value>& val);
   void set_proc_id(std::string id);
   std::string get_proc_id() const;
 };
@@ -82,7 +82,7 @@ public:
   virtual Builder &build_right_value(Value* val) = 0;
   virtual Builder &build_operator(_type_of_operator _operator) = 0;
   virtual void reset() = 0;
-  virtual std::shared_ptr<Construction> return_builded_obj() const = 0;
+  virtual std::shared_ptr<Construction>& return_builded_obj() = 0;
 };
 
 class InstructionBuilder : public Builder<Instruction> {
@@ -98,9 +98,9 @@ public:
   InstructionBuilder &build_operator(_type_of_operator _operator) override;
   InstructionBuilder &build_enable_while_cond();
   InstructionBuilder &build_expression(Expression& e);
-  InstructionBuilder &build_args_vector(std::shared_ptr<Value> arg);
+  InstructionBuilder &build_args_vector(std::shared_ptr<Value>& arg);
   InstructionBuilder &build_proc_id(std::string id);
-  std::shared_ptr<Instruction> return_builded_obj() const override;
+  std::shared_ptr<Instruction>& return_builded_obj() override;
 };
 
 class ExpressionBuilder : public Builder<Expression> {
@@ -113,7 +113,7 @@ public:
   ExpressionBuilder &build_left_value(Value* val) override;
   ExpressionBuilder &build_right_value(Value* val) override;
   ExpressionBuilder &build_operator(_type_of_operator _operator) override;
-  std::shared_ptr<Expression> return_builded_obj() const override;
+  std::shared_ptr<Expression>& return_builded_obj() override;
 
 };
 } // namespace Blocks
