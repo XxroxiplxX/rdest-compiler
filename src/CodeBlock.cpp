@@ -35,6 +35,7 @@ void CodeBlock::push_new_instruction(
   meat.push_back(instruction);
 }
 
+CodeBlockBuilder::CodeBlockBuilder() { reset(); }
 void CodeBlockBuilder::reset() {
   codeblock = std::shared_ptr<CodeBlock>(new CodeBlock);
 }

@@ -34,15 +34,16 @@ public:
   void set_codeblock_translated();
   void set_codeblock_instruction_pointer(int _ip);
   void set_codeblock_id(int _id);
-  void set_next_true_codeblock(std::shared_ptr<CodeBlock>&);
-  void set_next_false_codeblock(std::shared_ptr<CodeBlock>&);
-  void push_new_instruction(std::shared_ptr<Instruction>& instruction);
+  void set_next_true_codeblock(std::shared_ptr<CodeBlock> &);
+  void set_next_false_codeblock(std::shared_ptr<CodeBlock> &);
+  void push_new_instruction(std::shared_ptr<Instruction> &instruction);
 };
 
 class CodeBlockBuilder {
   std::shared_ptr<CodeBlock> codeblock;
 
 public:
+  CodeBlockBuilder();
   void reset();
   CodeBlockBuilder &build_codeblock_empty();
   CodeBlockBuilder &build_codeblock_last();
@@ -50,10 +51,10 @@ public:
   CodeBlockBuilder &build_codeblock_translated();
   CodeBlockBuilder &build_codeblock_instruction_pointer(int _ip);
   CodeBlockBuilder &build_codeblock_id(int _id);
-  CodeBlockBuilder &build_next_true_codeblock(std::shared_ptr<CodeBlock>&);
-  CodeBlockBuilder &build_next_false_codeblock(std::shared_ptr<CodeBlock>&);
+  CodeBlockBuilder &build_next_true_codeblock(std::shared_ptr<CodeBlock> &);
+  CodeBlockBuilder &build_next_false_codeblock(std::shared_ptr<CodeBlock> &);
   CodeBlockBuilder &
-  build_new_added_instruction(std::shared_ptr<Instruction>& instruction);
+  build_new_added_instruction(std::shared_ptr<Instruction> &instruction);
 };
 } // namespace Blocks
 
