@@ -12,7 +12,6 @@
 namespace Logging {
 class Logger {
 public:
-  Logger() = default;
   Logger(const std::string &filename) {
     file_.open(filename, std::ios::out );
   }
