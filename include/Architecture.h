@@ -9,7 +9,7 @@ namespace VirtualMachineModel {
 enum state { _LOCKED, _UNLOCKED };
 class Register {
   int id;
-  state state;
+  state _state;
   bool is_proc_arg;
 
 public:
@@ -23,28 +23,33 @@ public:
 };
 
 class RegisterFactory {
+  int register_index;
+
 public:
-  std::unique_ptr<Register> create_register_unique_ptr(int _id);
-  std::unique_ptr<Register> create_register_unique_ptr(int _id,
-                                                       const char *arg);
+  RegisterFactory();
+  std::unique_ptr<Register> create_register_unique_ptr();
+  std::unique_ptr<Register> create_register_unique_ptr(const char *arg);
 };
 class Memory {
   std::map<std::string, std::unique_ptr<Register>> variables;
   std::vector<std::string> argument_identificators;
   std::unique_ptr<Register> return_adress;
+  std::shared_ptr<RegisterFactory> register_factory_ptr;
 
 public:
-  std::unique_ptr<Register> get_variable(std::string identificator) const;
-  std::vector<std::string> &get_argument_identificators(int num);
-  std::unique_ptr<Register> get_return_adress() const;
-  void set_return_register();
-  void insert_variable();
+  Memory(std::shared_ptr<RegisterFactory> &reg_fact_ptr);
+  std::unique_ptr<Register> &get_variable(std::string &identificator);
+  std::vector<std::string> &get_argument_identificators();
+  std::unique_ptr<Register> &get_return_adress();
+  int set_return_adress();
+  int insert_variable(std::string &var_identificator);
+  void insert_argument(std::string &arg_identificator);
 };
 
 class Architecture {
   Logging::Logger log{"vm_model_log.log"};
-  int register_index;
-  std::map<std::string, Memory> procedures_memory;
+  std::shared_ptr<RegisterFactory> register_factory;
+  std::map<std::string, std::unique_ptr<Memory>> procedures_memory;
   std::map<std::string, std::unique_ptr<Register>> constants_registers;
   std::unique_ptr<Register> op_1;
   std::unique_ptr<Register> op_2;
@@ -61,19 +66,21 @@ class Architecture {
   void initialize_div_registers();
 
 public:
-  std::unique_ptr<Register> get_one_constant() const;
-  std::unique_ptr<Register> get_div_X() const;
-  std::unique_ptr<Register> get_div_Y() const;
-  std::unique_ptr<Register> get_div_R() const;
-  std::unique_ptr<Register> get_div_Q() const;
-  std::unique_ptr<Register> get_div_C() const;
-  std::unique_ptr<Register> get_mul_prd() const;
-  std::unique_ptr<Register> get_op_1() const;
-  std::unique_ptr<Register> get_op_2() const;
-  std::unique_ptr<Register> get_return_adress(std::string &proc_id) const;
-  std::unique_ptr<Register> get_constant(std::string &number) const;
-  std::unique_ptr<Register> get_register(std::string &identificator,
-                                         std::string &proc_id) const;
+  Architecture();
+  std::unique_ptr<Register> &get_one_constant();
+  std::unique_ptr<Register> &get_div_X();
+  std::unique_ptr<Register> &get_div_Y();
+  std::unique_ptr<Register> &get_div_R();
+  std::unique_ptr<Register> &get_div_Q();
+  std::unique_ptr<Register> &get_div_C();
+  std::unique_ptr<Register> &get_mul_prod();
+  std::unique_ptr<Register> &get_mul_trash();
+  std::unique_ptr<Register> &get_op_1();
+  std::unique_ptr<Register> &get_op_2();
+  std::unique_ptr<Register> &get_return_adress(std::string &proc_id);
+  std::unique_ptr<Register> &get_constant(std::string &number);
+  std::unique_ptr<Register> &get_register(std::string &identificator,
+                                          std::string &proc_id);
   void assert_var(std::string &identificator, std::string &proc_id);
   void assert_ret_reg(std::string &proc_id);
   void assert_const(std::string &number);
