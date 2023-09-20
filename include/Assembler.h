@@ -9,14 +9,21 @@ class AsmInstruction {
   std::string opcode;
 
 public:
+  void set_opcode(std::string &opcode);
   virtual void resolve_jump() = 0;
   virtual void print(std::ostream &os) const = 0;
+  virtual void
+  set_codeblock_to_jump(std::shared_ptr<Blocks::CodeBlock> &codeblock) {}
+  virtual void
+  set_adress(std::shared_ptr<VirtualMachineModel::Register> _register) {}
 };
 
 class AsmJumpInstruction : public AsmInstruction {
   std::shared_ptr<Blocks::CodeBlock> codeblock_to_jump;
 
 public:
+  void
+  set_codeblock_to_jump(std::shared_ptr<Blocks::CodeBlock> &codeblock) override;
   void print(std::ostream &os) const override;
   void resolve_jump() override;
 };
@@ -29,6 +36,8 @@ class AsmBasicInstruction : public AsmNotJumpInstruction {
   std::shared_ptr<VirtualMachineModel::Register> adress;
 
 public:
+  void
+  set_adress(std::shared_ptr<VirtualMachineModel::Register> _register) override;
   void print(std::ostream &os) const override;
 };
 
@@ -43,27 +52,43 @@ public:
   void print(std::ostream &os) const override;
 };
 
+class AsmInstructionBuilder {
+protected:
+  std::unique_ptr<AsmInstruction> asm_instruction_ptr;
 
+public:
+  virtual void reset() = 0;
+  virtual ~AsmInstructionBuilder() {}
+  virtual std::unique_ptr<AsmInstruction> &return_built_instruction() = 0;
+  AsmInstructionBuilder &build_instruction_opcode(std::string &_opcode);
+};
+class AsmJumpInstructionBuilder : public AsmInstructionBuilder {
+public:
+  AsmInstructionBuilder &
+  build_codeblock_to_jump(std::shared_ptr<Blocks::CodeBlock> &codeblock);
+  void reset() override;
+  std::unique_ptr<AsmInstruction> &return_built_instruction() override;
+};
+class AsmBasicInstructionBuilder : public AsmInstructionBuilder {
+public:
+  void reset() override;
+  std::unique_ptr<AsmInstruction> &return_built_instruction() override;
+  AsmBasicInstructionBuilder &build_instruction_address(
+      std::shared_ptr<VirtualMachineModel::Register> &_address);
+};
+class AsmSingleInstructionBuilder : public AsmInstructionBuilder {
+public:
+  void reset() override;
+  std::unique_ptr<AsmInstruction> &return_built_instruction() override;
+};
+class AsmConstantInstructionBuilder : public AsmInstructionBuilder {
+public:
+  void reset() override;
+  std::unique_ptr<AsmInstruction> &return_built_instruction() override;
+  AsmConstantInstructionBuilder &
+  build_instruction_constant(const std::string &_constant);
+};
 
-
-/*
-class AssemblerFactory {
-public:
-  virtual ~AssemblerFactory();
-  virtual std::unique_ptr<AsmInstruction> &create_asm_instruction() const;
-};
-class AsmBasicInstructionFactory : public AssemblerFactory {
-public:
-  std::unique_ptr<AsmInstruction> &create_asm_instruction() const override;
-};
-class AsmJumpFactory : public AssemblerFactory {
-public:
-  std::unique_ptr<AsmInstruction> &create_asm_instruction() const override;
-};
-class AsmSingleInstructionFactory : public AssemblerFactory {
-public:
-  std::unique_ptr<AsmInstruction> &create_asm_instruction() const override;
-};*/
 
 } // namespace Assembler
 
