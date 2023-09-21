@@ -31,7 +31,7 @@ class AsmJumpInstruction : public AsmInstruction {
 public:
   void
   set_codeblock_to_jump(std::shared_ptr<Blocks::CodeBlock> &codeblock) override;
-  void print(std::ostream &os) const override;
+  
   void resolve_jump() override;
 };
 
@@ -45,19 +45,19 @@ class AsmBasicInstruction : public AsmNotJumpInstruction {
 public:
   void
   set_adress(std::shared_ptr<VirtualMachineModel::Register> _register) override;
-  void print(std::ostream &os) const override;
+  
 };
 
 class AsmSingleInstruction : public AsmNotJumpInstruction {
 public:
-  void print(std::ostream &os) const override;
+  
 };
 class AsmConstantInstruction : public AsmNotJumpInstruction {
   std::string constant;
 
 public:
   void set_constant(std::string& _constant) override;
-  void print(std::ostream &os) const override;
+  
 };
 
 class AsmInstructionBuilder {
