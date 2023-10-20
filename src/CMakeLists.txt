@@ -1,7 +1,7 @@
 set(BINARY ${CMAKE_PROJECT_NAME})
 
 file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.cpp)
-if(FALSE)
+if(true)
 # Dodaj wywołanie Flex i Bison przed kompilacją
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/analyzer.cpp ${CMAKE_CURRENT_SOURCE_DIR}/parsery.cpp
