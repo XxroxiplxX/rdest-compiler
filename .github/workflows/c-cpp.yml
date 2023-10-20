@@ -1,0 +1,28 @@
+name: Test Workflow
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up CMake
+      uses: actions/setup-cmake@v2
+      with:
+        cmake-version: 3.x  # Wybierz odpowiednią wersję CMake.
+
+    - name: Build project
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make tst
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest
