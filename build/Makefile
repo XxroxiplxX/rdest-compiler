@@ -224,19 +224,6 @@ tst/fast:
 .PHONY : tst/fast
 
 #=============================================================================
-# Target rules for targets named compiler
-
-# Build rule for target.
-compiler: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 compiler
-.PHONY : compiler
-
-# fast build rule for target.
-compiler/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/compiler.dir/build.make CMakeFiles/compiler.dir/build
-.PHONY : compiler/fast
-
-#=============================================================================
 # Target rules for targets named rdest-compiler_run
 
 # Build rule for target.
@@ -388,7 +375,6 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
-	@echo "... compiler"
 	@echo "... run"
 	@echo "... tst"
 	@echo "... gmock"
