@@ -20,6 +20,15 @@ jobs:
 
     - name: Set up CMake
       run: sudo apt-get -y install cmake
+     
+    - name: Build Google Test
+      run: |
+        git clone https://github.com/google/googletest.git
+        cd googletest
+        mkdir build
+        cd build
+        cmake ..
+        make
 
     - name: Build project
       run: |
