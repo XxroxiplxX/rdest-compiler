@@ -13,10 +13,11 @@ if (CMAKE_BUILD_TYPE STREQUAL "compiler")
 else ()
     set(COMP_ON false)
 endif ()
-configure_file(src/CMakeLists.txt src/CMakeLists.txt)
+set(CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file( ${CMAKE_SOURCE_DIR}/src/CMakeLists.txt  ${CMAKE_SOURCE_DIR}/src/CMakeLists.txt)
 # Domyślne cele
-add_executable(rdest-compiler-main src/main.cpp)
-add_executable(rdest-compiler-test tst/main.cpp)
+add_executable(rdest-compiler-main  ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_executable(rdest-compiler-test  ${CMAKE_SOURCE_DIR}/tst/main.cpp)
 #add_executable(rdest-compiler-comp src/parsery.cpp)
 
 # Zdefiniuj cele do kompilacji
