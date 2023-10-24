@@ -17,12 +17,11 @@ endif ()
 
 # Domyślne cele
 add_executable(rdest-compiler-main  ${MY_PROJECT_ROOT_DIR}/src/main.cpp)
-add_executable(rdest-compiler-test  ${MY_PROJECT_ROOT_DIR}/tst/main.cpp)
-
+add_executable(rdest-compiler_test  ${MY_PROJECT_ROOT_DIR}/tst/main.cpp)
+add_test(NAME rdest-compiler_tst COMMAND ${MY_PROJECT_ROOT_DIR}/build/rdest-compiler_test)
 # Zdefiniuj cele do kompilacji
-target_link_libraries(rdest-compiler-test PRIVATE gtest)
-target_link_libraries(rdest-compiler-test PRIVATE gtest_main)
-
+target_link_libraries(rdest-compiler_test PRIVATE gtest)
+target_link_libraries(rdest-compiler_test PRIVATE gtest_main)
 # Domyślne cele do uruchamiania
 add_custom_target(run
     COMMAND rdest-compiler-main
@@ -31,8 +30,8 @@ add_custom_target(run
 )
 
 add_custom_target(tst
-    COMMAND rdest-compiler-test
-    DEPENDS rdest-compiler-test
+    COMMAND rdest-compiler_test
+    DEPENDS rdest-compiler_test
     WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}
 )
 

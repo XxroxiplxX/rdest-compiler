@@ -185,17 +185,17 @@ rdest-compiler-main/fast:
 .PHONY : rdest-compiler-main/fast
 
 #=============================================================================
-# Target rules for targets named rdest-compiler-test
+# Target rules for targets named rdest-compiler_test
 
 # Build rule for target.
-rdest-compiler-test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 rdest-compiler-test
-.PHONY : rdest-compiler-test
+rdest-compiler_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 rdest-compiler_test
+.PHONY : rdest-compiler_test
 
 # fast build rule for target.
-rdest-compiler-test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler-test.dir/build.make CMakeFiles/rdest-compiler-test.dir/build
-.PHONY : rdest-compiler-test/fast
+rdest-compiler_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler_test.dir/build.make CMakeFiles/rdest-compiler_test.dir/build
+.PHONY : rdest-compiler_test/fast
 
 #=============================================================================
 # Target rules for targets named run
@@ -343,7 +343,7 @@ tst/main.o: tst/main.cpp.o
 
 # target to build an object file
 tst/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler-test.dir/build.make CMakeFiles/rdest-compiler-test.dir/tst/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler_test.dir/build.make CMakeFiles/rdest-compiler_test.dir/tst/main.cpp.o
 .PHONY : tst/main.cpp.o
 
 tst/main.i: tst/main.cpp.i
@@ -351,7 +351,7 @@ tst/main.i: tst/main.cpp.i
 
 # target to preprocess a source file
 tst/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler-test.dir/build.make CMakeFiles/rdest-compiler-test.dir/tst/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler_test.dir/build.make CMakeFiles/rdest-compiler_test.dir/tst/main.cpp.i
 .PHONY : tst/main.cpp.i
 
 tst/main.s: tst/main.cpp.s
@@ -359,7 +359,7 @@ tst/main.s: tst/main.cpp.s
 
 # target to generate assembly for a file
 tst/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler-test.dir/build.make CMakeFiles/rdest-compiler-test.dir/tst/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rdest-compiler_test.dir/build.make CMakeFiles/rdest-compiler_test.dir/tst/main.cpp.s
 .PHONY : tst/main.cpp.s
 
 # Help Target
@@ -382,9 +382,9 @@ help:
 	@echo "... gtest"
 	@echo "... gtest_main"
 	@echo "... rdest-compiler-main"
-	@echo "... rdest-compiler-test"
 	@echo "... rdest-compiler_lib"
 	@echo "... rdest-compiler_run"
+	@echo "... rdest-compiler_test"
 	@echo "... rdest-compiler_tst"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
