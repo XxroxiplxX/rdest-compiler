@@ -10,6 +10,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Cache CMake
+      uses: actions/cache@v2
+      with:
+        path: ~/.cmake  # Ścieżka do katalogu, który chcesz zachować w cache
+        key: cmake-ubuntu  # Unikalny klucz dla cache
+        restore-keys: |
+          cmake-  # Lista kluczy do przywracania cache
 
     - name: Set up CMake
       run: sudo apt-get -y install cmake
@@ -18,7 +25,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake ..
+        cmake ${GITHUB_WORKSPACE}
         make tst
 
     - name: Run tests
