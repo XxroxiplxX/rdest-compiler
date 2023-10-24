@@ -8,17 +8,16 @@ include_directories(include)
 add_subdirectory(src)
 add_subdirectory(tst)
 add_subdirectory(googletest)
-if (CMAKE_BUILD_TYPE STREQUAL "compiler")
-    set(COMP_ON true)
+
+if (DEFINED ENV{GITHUB_WORKSPACE})
+    set(MY_PROJECT_ROOT_DIR $ENV{GITHUB_WORKSPACE})
 else ()
-    set(COMP_ON false)
+    set(MY_PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 endif ()
-set(CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-configure_file( ${CMAKE_SOURCE_DIR}/src/CMakeLists.txt  ${CMAKE_SOURCE_DIR}/src/CMakeLists.txt)
+
 # Domyślne cele
-add_executable(rdest-compiler-main  ${CMAKE_SOURCE_DIR}/src/main.cpp)
-add_executable(rdest-compiler-test  ${CMAKE_SOURCE_DIR}/tst/main.cpp)
-#add_executable(rdest-compiler-comp src/parsery.cpp)
+add_executable(rdest-compiler-main  ${MY_PROJECT_ROOT_DIR}/src/main.cpp)
+add_executable(rdest-compiler-test  ${MY_PROJECT_ROOT_DIR}/tst/main.cpp)
 
 # Zdefiniuj cele do kompilacji
 target_link_libraries(rdest-compiler-test PRIVATE gtest)
@@ -28,16 +27,12 @@ target_link_libraries(rdest-compiler-test PRIVATE gtest_main)
 add_custom_target(run
     COMMAND rdest-compiler-main
     DEPENDS rdest-compiler-main
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}
 )
 
 add_custom_target(tst
     COMMAND rdest-compiler-test
     DEPENDS rdest-compiler-test
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}
 )
-add_custom_target(compiler
-    COMMAND rdest-compiler-comp
-    DEPENDS rdest-compiler-comp
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
+
