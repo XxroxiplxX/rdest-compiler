@@ -23,6 +23,7 @@ jobs:
 
     - name: Build project
       run: |
+        rm -rdf build
         mkdir -p build
         cd build
         cmake -DCMAKE_SOURCE_DIR=${GITHUB_WORKSPACE} ..
