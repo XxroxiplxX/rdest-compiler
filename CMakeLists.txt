@@ -9,6 +9,9 @@ if (DEFINED ENV{GITHUB_WORKSPACE})
     set(PROJECT_ROOT $ENV{GITHUB_WORKSPACE})
 else ()
     set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+    add_subdirectory(compiler-rt)
+    message(rt)
+    
 endif ()
 
 # Compiler-assembler
@@ -21,7 +24,7 @@ add_subdirectory(compiler-ast)
 add_subdirectory(compiler-memory)
 
 # Compiler-rt
-add_subdirectory(compiler-rt)
+
 
 # Compiler-utils
 #include_directories(compiler-utils compiler-assembler)
@@ -36,4 +39,3 @@ add_custom_target(ut
     #DEPENDS lib_tst
     WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}
 )
-
