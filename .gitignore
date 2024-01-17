@@ -1,4 +1,4 @@
-build/*
+build
 all/*
 cmake/*
 cmake-build-debug-wsl/*
@@ -15,3 +15,4 @@ googletest
 include/DirectedGraph.h
 include/EdgeProvider.h
 src/DirectedGraph.cpp
+.vscode
