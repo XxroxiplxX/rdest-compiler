@@ -14,12 +14,7 @@ int yylex();
 void yyerror(const char *s);
 
 extern "C" FILE *yyin;
-int handle(const char* input_file, const char* output_file)
-{
-    yyin = fopen(input_file, "r" );
-    
-    return 0;
-}
+
 %}
 
 %define api.value.type {std::string}
@@ -217,6 +212,19 @@ void yyerror(const char* msg) {
     exit(1);
     
 }
+int handle(const char* input_file, const char* output_file)
+{
+    yyin = fopen(input_file, "r" );
+    
+    return 0;
+}
 
+int main(int argc, const char** argv) {
+
+    
+
+    return handle(argv[1], argv[2]);
+    
+}
 
 

@@ -10,8 +10,6 @@ if (DEFINED ENV{GITHUB_WORKSPACE})
 else ()
     set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(compiler-rt)
-    message(rt)
-    
 endif ()
 
 # Compiler-assembler

@@ -16,3 +16,6 @@ include/DirectedGraph.h
 include/EdgeProvider.h
 src/DirectedGraph.cpp
 .vscode
+compiler-rt/parsery.cpp
+compiler-rt/parsery.hpp
+compiler-rt/analyzer.cpp
