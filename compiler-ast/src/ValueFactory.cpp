@@ -1,4 +1,4 @@
-#include "../include/ValueFactory.h"
+#include "ValueFactory.h"
 
 namespace ValueTypes {
 Value *ValueFactory::create_numerical_value() const {

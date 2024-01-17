@@ -1,8 +1,4 @@
-set(BINARY ${CMAKE_PROJECT_NAME})
 
-file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.cpp)
-if(true)
-# Dodaj wywołanie Flex i Bison przed kompilacją
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/analyzer.cpp ${CMAKE_CURRENT_SOURCE_DIR}/parsery.cpp
     COMMAND flex -o ${CMAKE_CURRENT_SOURCE_DIR}/analyzer.cpp ${CMAKE_CURRENT_SOURCE_DIR}/lexer.l
@@ -11,10 +7,15 @@ add_custom_command(
     COMMENT "Generating lexer and parser"
 )
 
-set(SOURCES ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/analyzer.cpp ${CMAKE_CURRENT_SOURCE_DIR}/parsery.cpp)
-else()
-set(SOURCES ${SOURCES})
-endif()
-add_executable(${BINARY}_run ${SOURCES})
+file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.h *.cpp)
 
-add_library(${BINARY}_lib STATIC ${SOURCES})
+set(SOURCES ${SOURCES})
+
+add_executable(compiler_rt ${SOURCES})
+
+target_link_libraries(compiler_rt PRIVATE 
+    compilerAssemblerLib
+    compilerAstLib
+    compilerMemoryLib
+    compilerUtilsLib
+    )

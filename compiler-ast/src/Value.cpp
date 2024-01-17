@@ -1,4 +1,4 @@
-#include "../include/Value.h"
+#include "Value.h"
 #include <string>
 
 namespace ValueTypes {

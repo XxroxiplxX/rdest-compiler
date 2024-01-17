@@ -3,35 +3,37 @@ project(rdest-compiler)
 enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(src)
-include_directories(include)
-add_subdirectory(src)
-add_subdirectory(tst)
-add_subdirectory(googletest)
+
 
 if (DEFINED ENV{GITHUB_WORKSPACE})
-    set(MY_PROJECT_ROOT_DIR $ENV{GITHUB_WORKSPACE})
+    set(PROJECT_ROOT $ENV{GITHUB_WORKSPACE})
 else ()
-    set(MY_PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 endif ()
 
-# Domyślne cele
-add_executable(rdest-compiler-main  ${MY_PROJECT_ROOT_DIR}/src/main.cpp)
-add_executable(rdest-compiler_test  ${MY_PROJECT_ROOT_DIR}/tst/main.cpp)
-add_test(NAME rdest-compiler_tst COMMAND ${MY_PROJECT_ROOT_DIR}/build/rdest-compiler_test)
-# Zdefiniuj cele do kompilacji
-target_link_libraries(rdest-compiler_test PRIVATE gtest)
-target_link_libraries(rdest-compiler_test PRIVATE gtest_main)
-# Domyślne cele do uruchamiania
-add_custom_target(run
-    COMMAND rdest-compiler-main
-    DEPENDS rdest-compiler-main
-    WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}
-)
+# Compiler-assembler
+add_subdirectory(compiler-assembler)
 
-add_custom_target(tst
-    COMMAND rdest-compiler_test
-    DEPENDS rdest-compiler_test
+# Compiler-ast
+add_subdirectory(compiler-ast)
+
+# Compiler-memory
+add_subdirectory(compiler-memory)
+
+# Compiler-rt
+add_subdirectory(compiler-rt)
+
+# Compiler-utils
+#include_directories(compiler-utils compiler-assembler)
+add_subdirectory(compiler-utils)
+add_subdirectory(googletest)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/compiler-utils)
+
+add_custom_target(ut
+    COMMAND compilerAstTest
+    DEPENDS compilerAstTest
+    #COMMAND lib_tst
+    #DEPENDS lib_tst
     WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}
 )
 

@@ -2,7 +2,7 @@
 #define COMPILER_VALUETYPES_VALUEFACTORY
 
 #include "Value.h"
-#include "Logger.h"
+#include <compiler-utils/src/Logger.h>
 namespace ValueTypes {
 class AbstractValueFactory {
 public:

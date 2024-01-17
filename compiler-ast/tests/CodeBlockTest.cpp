@@ -1,5 +1,6 @@
-#include "CodeBlock.h"
-#include "Block.h"
+
+#include <compiler-ast/src/CodeBlock.h>
+
 #include "gtest/gtest.h"
 #include <memory>
 namespace UnitTests {

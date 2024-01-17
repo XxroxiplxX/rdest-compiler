@@ -1,7 +1,5 @@
-#include "Block.h"
-#include "CodeBlock.h"
-#include "ValueFactory.h"
-#include "TreeConfigurationProvider.h"
+#include <compiler-ast/src/Block.h>
+#include <compiler-ast/src/CodeBlock.h>
 #include "gtest/gtest.h"
 #include <memory>
 

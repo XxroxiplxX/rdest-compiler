@@ -2,7 +2,8 @@
 #define COMPILER_TREE_CONFIGURATION_PROVIDER
 #include "Block.h"
 #include "CodeBlock.h"
-#include "Logger.h"
+
+#include "compiler-utils/src/Logger.h"
 #include <memory>
 #include <vector>
 

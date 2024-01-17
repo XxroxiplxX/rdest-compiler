@@ -1,8 +1,10 @@
 #ifndef COMPILER_ASSEMBLER
 #define COMPILER_ASSEMBLER
-#include "Architecture.h"
-#include "CodeBlock.h"
+#include <compiler-ast/src/Block.h>
 #include <memory>
+#include <string>
+#include "../compiler-ast/CodeBlock.h"
+
 namespace Assembler {
 #define DEFAULT_ASSEMBLER_ARG_BEGIN 10
 #define DEFAULT_ASSEMBLER_ARG_SPACING 12

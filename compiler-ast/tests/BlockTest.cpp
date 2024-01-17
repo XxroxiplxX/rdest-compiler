@@ -1,5 +1,5 @@
-#include "Block.h"
-#include "ValueFactory.h"
+#include <compiler-ast/src/Block.h>
+#include <compiler-ast/src/ValueFactory.h>
 #include "gtest/gtest.h"
 
 namespace UnitTests {

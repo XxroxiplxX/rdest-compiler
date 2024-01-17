@@ -1,7 +1,7 @@
 #ifndef COMPILER_VMM_ARCHTECTURE
 #define COMPILER_VMM_ARCHTECTURE
 
-#include "Logger.h"
+#include <compiler-utils/src/Logger.h>
 #include <map>
 #include <memory>
 #include <vector>
