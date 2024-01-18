@@ -11,7 +11,7 @@ else ()
     set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(compiler-rt)
 endif ()
-
+set(ENV{PROJECT_ROOT} ${PROJECT_ROOT})
 # Compiler-assembler
 add_subdirectory(compiler-assembler)
 
@@ -33,6 +33,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/compiler-utils)
 add_custom_target(ut
     COMMAND compilerAstTest
     DEPENDS compilerAstTest
+    COMMAND compilerAssemblerTest
+    DEPENDS compilerAssemblerTest
     #COMMAND lib_tst
     #DEPENDS lib_tst
     WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}

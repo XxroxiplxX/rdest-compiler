@@ -15,7 +15,7 @@ TEST(CodeBlockTest, basic_codeblock_creation) {
                  .build_new_added_instruction(
                      instruction_builder_ptr->build_proc_id("proc3")
                          .return_builded_obj())
-                 .return_builded_obj();
+                 .return_built_obj();
   EXPECT_EQ(3, cb1->get_codeblock_id());
   EXPECT_EQ("proc3", cb1->get_all_instructions()[0]->get_proc_id());
 }

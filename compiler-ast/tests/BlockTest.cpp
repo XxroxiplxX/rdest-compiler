@@ -1,6 +1,7 @@
-#include <compiler-ast/src/Block.h>
+//#include <compiler-ast/src/Block.h>
 #include <compiler-ast/src/ValueFactory.h>
 #include "gtest/gtest.h"
+#include "Block.h"
 
 namespace UnitTests {
 using namespace Blocks;

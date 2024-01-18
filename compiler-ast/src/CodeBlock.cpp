@@ -82,7 +82,9 @@ CodeBlockBuilder &CodeBlockBuilder::build_new_added_instruction(
   codeblock->push_new_instruction(instruction);
   return *this;
 }
-std::shared_ptr<CodeBlock>& CodeBlockBuilder::return_builded_obj() {
-  return codeblock;
+std::shared_ptr<CodeBlock> CodeBlockBuilder::return_built_obj() {
+  auto tmp = codeblock;
+  reset();
+  return tmp;
 }
 } // namespace Blocks

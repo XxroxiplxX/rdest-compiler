@@ -1,5 +1,6 @@
 #include "Architecture.h"
 #include <memory>
+#include <string>
 
 namespace VirtualMachineModel {
 
@@ -11,16 +12,18 @@ Register::Register(int _id, const char *arg)
 void Register::lock() { _state = _LOCKED; }
 void Register::unlock() { _state = _UNLOCKED; }
 int Register::get_id() const { return id; }
-bool Register::is_locked() const { return (_state == _LOCKED) ? true : false; }
+bool Register::is_locked() const { return (_state == _LOCKED); }
 bool Register::is_reg_proc_arg() const { return is_proc_arg; }
-
+std::string Register::get_id_as_string() const {
+  return std::to_string(id);
+}
 RegisterFactory::RegisterFactory() : register_index(0) {}
 std::shared_ptr<Register> RegisterFactory::create_register_shared_ptr() {
-  return std::shared_ptr<Register>(new Register(register_index++));
+  return std::make_shared<Register>(register_index++);
 }
 std::shared_ptr<Register>
 RegisterFactory::create_register_shared_ptr(const char *arg) {
-  return std::shared_ptr<Register>(new Register(register_index++, arg));
+  return std::make_shared<Register>(register_index++, arg);
 }
 
 Memory::Memory(std::shared_ptr<RegisterFactory> &reg_fact_ptr)
@@ -47,7 +50,7 @@ void Memory::insert_argument(std::string &arg_identificator) {
 
 Architecture::Architecture()
     : register_factory(
-          std::shared_ptr<RegisterFactory>(new RegisterFactory())) {
+          std::make_shared<RegisterFactory>()) {
   initialize_constants();
   initialize_mul_registers();
   initialize_div_registers();

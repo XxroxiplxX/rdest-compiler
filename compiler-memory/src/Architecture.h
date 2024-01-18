@@ -20,6 +20,7 @@ public:
   int get_id() const;
   bool is_locked() const;
   bool is_reg_proc_arg() const;
+  std::string get_id_as_string() const;
 };
 
 class RegisterFactory {

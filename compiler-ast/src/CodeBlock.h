@@ -56,7 +56,7 @@ public:
   CodeBlockBuilder &build_next_false_codeblock(std::shared_ptr<CodeBlock> &);
   CodeBlockBuilder &
   build_new_added_instruction(std::shared_ptr<Instruction> &instruction);
-  std::shared_ptr<CodeBlock>& return_builded_obj();
+  std::shared_ptr<CodeBlock> return_built_obj();
 };
 } // namespace Blocks
 

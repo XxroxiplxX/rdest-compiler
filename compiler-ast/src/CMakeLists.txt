@@ -13,4 +13,7 @@ set(LIB_SOURCE_FILES
 add_library(${LIB_NAME} SHARED ${LIB_SOURCE_FILES})
 
 # Dodaj ścieżkę do pliku nagłówkowego
-target_include_directories(${LIB_NAME} PUBLIC ${PROJECT_ROOT})
+target_include_directories(${LIB_NAME} PUBLIC 
+    $<BUILD_INTERFACE:${PROJECT_ROOT}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    )
