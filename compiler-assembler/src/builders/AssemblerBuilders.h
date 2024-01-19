@@ -5,6 +5,7 @@
 
 namespace assembler::builders {
 using namespace fields;
+using ast::blocks::fields::CodeBlock;
 class AsmInstructionBuilder {
 protected:
   std::shared_ptr<AsmInstruction> asm_instruction_ptr;
@@ -20,7 +21,7 @@ class AsmJumpInstructionBuilder : public AsmInstructionBuilder {
 public:
   AsmJumpInstructionBuilder();
   AsmInstructionBuilder &
-  build_codeblock_to_jump(std::shared_ptr<Blocks::CodeBlock> &codeblock);
+  build_codeblock_to_jump(std::shared_ptr<CodeBlock> &codeblock);
   void reset() override;
   std::shared_ptr<AsmInstruction> return_built_instruction() override;
 };
@@ -30,7 +31,7 @@ public:
   void reset() override;
   std::shared_ptr<AsmInstruction> return_built_instruction() override;
   AsmInstructionBuilder &build_instruction_address(
-      std::shared_ptr<VirtualMachineModel::Register> &_address);
+      std::shared_ptr<memory::Register> &_address);
 };
 class AsmSingleInstructionBuilder : public AsmInstructionBuilder {
 public:

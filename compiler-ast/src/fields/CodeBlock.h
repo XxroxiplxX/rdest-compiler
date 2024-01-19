@@ -2,10 +2,10 @@
 #define COMPILER_BLOCKS_CODEBLOCK
 
 #include "Block.h"
+#include "Instruction.h"
 #include <memory>
 #include <vector>
-
-namespace Blocks {
+namespace ast::blocks::fields {
 class CodeBlock {
   bool is_empty;
   bool is_last;
@@ -40,24 +40,6 @@ public:
   void push_new_instruction(std::shared_ptr<Instruction> &instruction);
 };
 
-class CodeBlockBuilder {
-  std::shared_ptr<CodeBlock> codeblock;
-
-public:
-  CodeBlockBuilder();
-  void reset();
-  CodeBlockBuilder &build_codeblock_empty();
-  CodeBlockBuilder &build_codeblock_last();
-  CodeBlockBuilder &build_codeblock_visited();
-  CodeBlockBuilder &build_codeblock_translated();
-  CodeBlockBuilder &build_codeblock_instruction_pointer(int _ip);
-  CodeBlockBuilder &build_codeblock_id(int _id);
-  CodeBlockBuilder &build_next_true_codeblock(std::shared_ptr<CodeBlock> &);
-  CodeBlockBuilder &build_next_false_codeblock(std::shared_ptr<CodeBlock> &);
-  CodeBlockBuilder &
-  build_new_added_instruction(std::shared_ptr<Instruction> &instruction);
-  std::shared_ptr<CodeBlock> return_built_obj();
-};
-} // namespace Blocks
+} // namespace ast::blocks::fields
 
 #endif // COMPILER_BLOCKS_CODEBLOCK

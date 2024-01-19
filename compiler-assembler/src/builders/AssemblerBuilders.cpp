@@ -18,7 +18,7 @@ AsmInstructionBuilder::build_instruction_comment(const char *_comment) {
 }
 
 AsmInstructionBuilder &AsmJumpInstructionBuilder::build_codeblock_to_jump(
-    std::shared_ptr<Blocks::CodeBlock> &codeblock) {
+    std::shared_ptr<CodeBlock> &codeblock) {
   asm_instruction_ptr->set_codeblock_to_jump(codeblock);
   return *this;
 }
@@ -50,7 +50,7 @@ AsmBasicInstructionBuilder::return_built_instruction() {
 }
 
 AsmInstructionBuilder &AsmBasicInstructionBuilder::build_instruction_address(
-    std::shared_ptr<VirtualMachineModel::Register> &_address) {
+    std::shared_ptr<memory::Register> &_address) {
   asm_instruction_ptr->set_address(_address);
   return *this;
 }

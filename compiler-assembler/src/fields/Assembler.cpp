@@ -1,8 +1,9 @@
 #include "Assembler.h"
-#include "compiler-ast/src/CodeBlock.h"
+#include <compiler-ast/src/fields/CodeBlock.h>
 #include <stdexcept>
 #include <string>
-
+#include <iomanip>
+#include <iostream>
 namespace assembler::fields {
 using std::to_string;
 
@@ -11,7 +12,7 @@ void AsmInstruction::set_opcode(const char *_opcode) { opcode = _opcode; }
 void AsmInstruction::set_comment(const char *_comment) { comment = _comment; }
 
 void AsmJumpInstruction::set_codeblock_to_jump(
-    std::shared_ptr<Blocks::CodeBlock> &codeblock) {
+    std::shared_ptr<CodeBlock> &codeblock) {
   codeblock_to_jump = codeblock;
 }
 
@@ -45,7 +46,7 @@ void AsmBasicInstruction::print(std::ostream &os) {
 }
 
 void AsmBasicInstruction::set_address(
-    std::shared_ptr<VirtualMachineModel::Register> &_register) {
+    std::shared_ptr<memory::Register> &_register) {
   address = _register;
 }
 

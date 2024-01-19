@@ -2,8 +2,9 @@
 #define COMPILER_VALUETYPES_VALUEFACTORY
 
 #include "Value.h"
-#include <compiler-utils/src/Logger.h>
-namespace ValueTypes {
+
+namespace ast::blocks::builders {
+using namespace fields;
 class AbstractValueFactory {
 public:
   virtual Value *create_numerical_value() const = 0;
@@ -11,14 +12,13 @@ public:
 };
 
 class ValueFactory : public AbstractValueFactory {
-  Logging::Logger log{"value_factory_logs.log"};
+
   Value *create_numerical_value() const override;
   Value *create_ident_value() const override;
 
 public:
   Value *create_value(std::string base);
 };
-} // namespace ValueTypes
-
+} // namespace ast::blocks::builders
 
 #endif

@@ -5,20 +5,15 @@
 #include <stdexcept>
 #include <string>
 
-int EdgeProvider::get_begin_id() const { return _begin_id; }
-void EdgeProvider::set_begin_id(int to_set) { _begin_id = to_set; }
-
-int EdgeProvider::get_end_id() const { return _end_id; }
-void EdgeProvider::set_end_id(int to_set) { _end_id = to_set; }
-
+namespace ast::providers {
 TreeConfigurationProvider::TreeConfigurationProvider()
     : configuration_id(0),
-      codeblock_builder(std::make_unique<Blocks::CodeBlockBuilder>(
-          Blocks::CodeBlockBuilder())),
-      instruction_builder(std::make_unique<Blocks::InstructionBuilder>(
-          Blocks::InstructionBuilder())),
-      expression_builder(std::make_unique<Blocks::ExpressionBuilder>(
-          Blocks::ExpressionBuilder())) {}
+      codeblock_builder(std::make_unique<builders::CodeBlockBuilder>(
+          builders::CodeBlockBuilder())),
+      instruction_builder(std::make_unique<builders::InstructionBuilder>(
+          builders::InstructionBuilder())),
+      expression_builder(std::make_unique<builders::ExpressionBuilder>(
+          builders::ExpressionBuilder())) {}
 void TreeConfigurationProvider::increment_configuration_id() {
   configuration_id++;
 }
@@ -105,15 +100,16 @@ TreeConfigurationProvider::get_configuration(std::string &configuration_id) {
   }
   return providers_vector[conf_id];
 }
-std::unique_ptr<Blocks::CodeBlockBuilder> &
+std::unique_ptr<builders::CodeBlockBuilder> &
 TreeConfigurationProvider::get_codeblock_builder() {
   return codeblock_builder;
 }
-std::unique_ptr<Blocks::InstructionBuilder> &
+std::unique_ptr<builders::InstructionBuilder> &
 TreeConfigurationProvider::get_instruction_builder() {
   return instruction_builder;
 }
-std::unique_ptr<Blocks::ExpressionBuilder> &
+std::unique_ptr<builders::ExpressionBuilder> &
 TreeConfigurationProvider::get_expression_builder() {
   return expression_builder;
 }
+} // namespace ast::providers

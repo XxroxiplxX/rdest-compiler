@@ -1,7 +1,7 @@
 #include "Value.h"
 #include <string>
 
-namespace ValueTypes {
+namespace ast::blocks::fields {
 
 std::string type_to_string(type_of_value type) {
   if (type == _NUM) {
@@ -24,4 +24,4 @@ std::string IdentifierValue::val_to_string() {
 }
 type_of_value IdentifierValue::get_type() { return type_of_value::_ID; }
 
-} // namespace ValueTypes
+} // namespace ast::blocks::fields

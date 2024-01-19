@@ -35,6 +35,8 @@ add_custom_target(ut
     DEPENDS compilerAstTest
     COMMAND compilerAssemblerTest
     DEPENDS compilerAssemblerTest
+    COMMAND compilerMemoryTest
+    DEPENDS compilerMemoryTest
     #COMMAND lib_tst
     #DEPENDS lib_tst
     WORKING_DIRECTORY ${MY_PROJECT_ROOT_DIR}

@@ -1,13 +1,15 @@
 #ifndef COMPILER_VALUETYPES_VALUE
 #define COMPILER_VALUETYPES_VALUE
 #include <string>
-namespace ValueTypes {
+namespace ast::blocks::fields {
 enum type_of_value { _NUM = 1, _ID = 2 };
 std::string type_to_string(type_of_value type);
 class Value {
   std::string val;
+
 protected:
   virtual type_of_value get_type() = 0;
+
 public:
   virtual ~Value(){};
   virtual std::string val_to_string() = 0;
@@ -26,6 +28,6 @@ class IdentifierValue : public Value {
 public:
   std::string val_to_string() override;
 };
-} // namespace ValueTypes
+} // namespace ast::blocks::fields
 
 #endif

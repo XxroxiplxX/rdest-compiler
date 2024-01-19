@@ -1,7 +1,7 @@
 #include "Assembler.h"
 #include "AssemblerBuilders.h"
 #include "CodeBlock.h"
-#include "compiler-memory/src/Architecture.h"
+#include "CodeBlockBuilder.h"
 #include <gtest/gtest.h>
 #include <memory>
 #include <ostream>
@@ -10,7 +10,8 @@
 
 namespace ut {
 using namespace assembler;
-using namespace VirtualMachineModel;
+using namespace memory;
+using ast::blocks::builders::CodeBlockBuilder;
 class TestStream : public std::ostream {};
 class AssemblerTest : public ::testing::Test {
 public:
@@ -20,7 +21,7 @@ public:
   builders::AsmConstantInstructionBuilder const_ins_builder;
   builders::AsmJumpInstructionBuilder jump_ins_builder;
   builders::AsmSingleInstructionBuilder single_ins_builder;
-  Blocks::CodeBlockBuilder code_block_builder;
+  CodeBlockBuilder code_block_builder;
   std::shared_ptr<Register> test_register;
   void set_up() { test_register = std::make_shared<Register>(Register(5)); }
   std::ostringstream test_stream;
